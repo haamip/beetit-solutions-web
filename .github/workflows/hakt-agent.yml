@@ -1,0 +1,116 @@
+name: HAKT Production Agent
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 19 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  quality:
+    name: Build, lint, SEO and security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Production build
+        run: npm run build
+
+      - name: SEO audit
+        run: npm run seo:audit
+
+      - name: Dependency security audit
+        run: npm audit --audit-level=high
+
+  uptime:
+    name: Production health
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check production site
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: node scripts/site-health.mjs
+
+  incident:
+    name: Surface scheduled failures
+    needs: [quality, uptime]
+    if: always() && github.event_name == 'schedule' && (needs.quality.result == 'failure' || needs.uptime.result == 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create or update HAKT Agent incident
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'HAKT Agent: production maintenance check failed'
+            const body = [
+              'The scheduled HAKT Production Agent detected a failure.',
+              '',
+              `Quality job: ${context.payload.workflow_run ? 'See workflow run' : '${{ needs.quality.result }}'}`,
+              `Uptime job: ${{ needs.uptime.result }}`,
+              '',
+              `Workflow run: https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              '',
+              'Review the failed step before the next production change.'
+            ].join('\n')
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'hakt-agent',
+              per_page: 20
+            })
+
+            const existing = issues.find(issue => issue.title === title)
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body
+              })
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['hakt-agent']
+              }).catch(async () => {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title,
+                  body
+                })
+              })
+            }
