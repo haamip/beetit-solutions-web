@@ -1,13 +1,18 @@
 {
   "name": "beetit-solutions",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seo:audit": "node scripts/seo-audit.mjs",
+    "health:check": "node scripts/site-health.mjs",
+    "security:audit": "npm audit --audit-level=high",
+    "agent:check": "npm run lint && npm run build && npm run seo:audit",
+    "agent": "npm run agent:check"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
