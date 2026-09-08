@@ -17,5 +17,6 @@ export const siteConfig = {
     'Elderly Care Advocacy',
     'Insurance Claims Assistance',
     'Te Tiriti and Treaty Research and Advisory',
+    'Other / Not sure',
   ],
 } as const
