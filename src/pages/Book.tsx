@@ -1,13 +1,101 @@
-import { CalendarDays, Clock3 } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock3, LoaderCircle } from 'lucide-react'
+import { FormEvent, useEffect, useState } from 'react'
 import { siteConfig } from '../config/site'
+import {
+  AvailableSlot,
+  formatNzTime,
+  getAvailableSlots,
+  nzDateString,
+  submitBooking,
+} from '../lib/beetitApi'
 import { useSeo } from '../lib/seo'
 
 export function Book() {
+  const [date, setDate] = useState('')
+  const [slots, setSlots] = useState<AvailableSlot[]>([])
+  const [selectedStartAt, setSelectedStartAt] = useState('')
+  const [loadingSlots, setLoadingSlots] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+
   useSeo({
     title: 'Book a Consultation',
     description: 'Book a 60 minute consultation with Donna Pokere Phillips for legal advocacy and advisory support.',
     path: '/book',
   })
+
+  useEffect(() => {
+    if (!date) {
+      setSlots([])
+      setSelectedStartAt('')
+      return
+    }
+
+    let active = true
+    setLoadingSlots(true)
+    setError('')
+    setSelectedStartAt('')
+
+    getAvailableSlots(date)
+      .then((available) => {
+        if (active) setSlots(available)
+      })
+      .catch(() => {
+        if (active) setError('We could not load the available times. Please try again.')
+      })
+      .finally(() => {
+        if (active) setLoadingSlots(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [date])
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+    setSuccess('')
+
+    if (!selectedStartAt) {
+      setError('Please choose an available consultation time.')
+      return
+    }
+
+    const form = event.currentTarget
+    const data = new FormData(form)
+
+    try {
+      setSubmitting(true)
+      await submitBooking({
+        fullName: String(data.get('name') ?? ''),
+        email: String(data.get('email') ?? ''),
+        phone: String(data.get('phone') ?? ''),
+        service: String(data.get('service') ?? ''),
+        consultationType: String(data.get('consultationType') ?? 'Phone') as 'Phone' | 'Video' | 'In Person',
+        startAt: selectedStartAt,
+        importantDate: String(data.get('importantDate') ?? ''),
+        message: String(data.get('message') ?? ''),
+        privacyConsent: data.get('privacyConsent') === 'on',
+      })
+
+      setSuccess('Your consultation request has been received. Donna will be notified and the selected time is now held for you.')
+      form.reset()
+      setDate('')
+      setSlots([])
+      setSelectedStartAt('')
+    } catch (bookingError) {
+      const message = bookingError instanceof Error ? bookingError.message : 'We could not submit your booking.'
+      setError(message.includes('taken') || message.includes('available') ? message : 'We could not submit your booking. Please check the details and try again.')
+
+      if (date) {
+        getAvailableSlots(date).then(setSlots).catch(() => undefined)
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <section className="page-section">
@@ -16,7 +104,7 @@ export function Book() {
           <p className="eyebrow">Book a consultation</p>
           <h1>Choose a time that works for you.</h1>
           <p>
-            Consultations are 60 minutes. Complete the form and the live availability calendar will be connected during the booking build.
+            Consultations are 60 minutes. Choose a date to see Donna's live availability. Friday appointments are by arrangement through the contact page.
           </p>
           <div className="info-card">
             <CalendarDays size={22} />
@@ -34,7 +122,20 @@ export function Book() {
           </div>
         </div>
 
-        <form className="form-card" onSubmit={(event) => event.preventDefault()}>
+        <form className="form-card" onSubmit={handleSubmit}>
+          {success && (
+            <div className="form-status success" role="status">
+              <CheckCircle2 size={20} />
+              <span>{success}</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="form-status error" role="alert">
+              <span>{error}</span>
+            </div>
+          )}
+
           <div className="field-grid two-column">
             <label>
               Full name
@@ -70,16 +171,44 @@ export function Book() {
             </select>
           </label>
 
-          <div className="field-grid two-column">
-            <label>
-              Preferred date
-              <input name="preferredDate" type="date" required />
-            </label>
-            <label>
-              Preferred time
-              <input name="preferredTime" type="time" required />
-            </label>
-          </div>
+          <label>
+            Preferred date
+            <input
+              name="preferredDate"
+              type="date"
+              min={nzDateString()}
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+              required
+            />
+          </label>
+
+          <fieldset className="slot-fieldset">
+            <legend>Available times</legend>
+            {!date && <p className="slot-help">Choose a date first.</p>}
+            {loadingSlots && (
+              <div className="slot-loading">
+                <LoaderCircle className="spin" size={18} /> Loading available times
+              </div>
+            )}
+            {date && !loadingSlots && slots.length === 0 && (
+              <p className="slot-help">No online times are available for this date. Online bookings are Monday to Thursday.</p>
+            )}
+            {slots.length > 0 && (
+              <div className="slot-grid">
+                {slots.map((slot) => (
+                  <button
+                    key={slot.start_at}
+                    className={selectedStartAt === slot.start_at ? 'slot-button selected' : 'slot-button'}
+                    type="button"
+                    onClick={() => setSelectedStartAt(slot.start_at)}
+                  >
+                    {formatNzTime(slot.start_at)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </fieldset>
 
           <label>
             Important date or deadline <span className="optional">Optional</span>
@@ -96,8 +225,8 @@ export function Book() {
             <span>I consent to Beet It Solutions using this information to respond to my booking request.</span>
           </label>
 
-          <button className="button primary full-width" type="submit" disabled>
-            Live booking connection coming next
+          <button className="button primary full-width" type="submit" disabled={submitting || !selectedStartAt}>
+            {submitting ? 'Sending booking…' : 'Request consultation'}
           </button>
         </form>
       </div>
