@@ -106,7 +106,7 @@
   min-width: 0;
   min-height: 118px;
   display: grid;
-  justify-items: start;
+  justify-items: stretch;
   align-content: start;
   gap: 3px;
   padding: 12px 10px;
@@ -116,7 +116,8 @@
   color: var(--ink);
   text-align: left;
   cursor: pointer;
-  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  overflow: hidden;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
 }
 
 .availability-day:hover:not(:disabled) {
@@ -127,11 +128,35 @@
 
 .availability-day.selected {
   border-color: var(--olive-dark);
-  box-shadow: inset 0 0 0 1px var(--olive-dark);
+  box-shadow: inset 0 0 0 1px var(--olive-dark), 0 8px 20px rgba(57, 56, 46, 0.08);
 }
 
 .availability-day:disabled {
   cursor: default;
+}
+
+.availability-day.free {
+  border-color: rgba(93, 117, 82, 0.32);
+}
+
+.availability-day.limited {
+  border-color: rgba(198, 155, 63, 0.38);
+  background: #fffaf0;
+}
+
+.availability-day.full {
+  border-color: rgba(165, 95, 83, 0.26);
+  background: #f3e9e5;
+}
+
+.availability-day.closed {
+  border-color: rgba(115, 115, 105, 0.18);
+  background: #ebe7dd;
+}
+
+.availability-day.loading {
+  border-color: rgba(115, 115, 105, 0.18);
+  background: #f0ece3;
 }
 
 .availability-weekday,
@@ -150,44 +175,62 @@
   line-height: 1;
 }
 
+.availability-day.full .availability-weekday,
+.availability-day.full .availability-month {
+  color: #8a625c;
+}
+
+.availability-day.closed .availability-weekday,
+.availability-day.closed .availability-month,
+.availability-day.closed strong,
+.availability-day.loading .availability-weekday,
+.availability-day.loading .availability-month {
+  color: #86887f;
+}
+
 .availability-status {
+  width: 100%;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  gap: 4px;
   margin-top: auto;
-  padding: 5px 8px;
+  padding: 5px 5px;
+  border: 1px solid transparent;
   border-radius: 999px;
-  font-size: 0.66rem;
+  font-size: clamp(0.56rem, 0.68vw, 0.66rem);
   font-weight: 850;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  text-align: center;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .availability-status.free {
+  border-color: rgba(93, 117, 82, 0.12);
   background: rgba(93, 117, 82, 0.14);
   color: #3f5d37;
 }
 
 .availability-status.limited {
+  border-color: rgba(198, 155, 63, 0.14);
   background: rgba(198, 155, 63, 0.16);
   color: #7f611d;
 }
 
 .availability-status.full {
+  border-color: rgba(165, 95, 83, 0.12);
   background: rgba(165, 95, 83, 0.14);
   color: #7b3f36;
 }
 
 .availability-status.closed,
 .availability-status.loading {
-  background: rgba(115, 115, 105, 0.1);
-  color: #717169;
-}
-
-.availability-day.closed,
-.availability-day.full {
-  background: #eee9de;
-  opacity: 0.78;
+  border-color: rgba(115, 115, 105, 0.1);
+  background: rgba(115, 115, 105, 0.11);
+  color: #6f7069;
 }
 
 .slot-button {
@@ -228,5 +271,12 @@
 
   .availability-day {
     min-height: 104px;
+  }
+
+  .availability-status {
+    width: auto;
+    justify-self: start;
+    padding-inline: 9px;
+    font-size: 0.64rem;
   }
 }
