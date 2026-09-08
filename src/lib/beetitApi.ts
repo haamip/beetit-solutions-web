@@ -84,3 +84,39 @@ export function nzDateString(date = new Date()) {
     day: '2-digit',
   }).format(date)
 }
+
+function getTimeZoneOffset(timestamp: number, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date(timestamp))
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  const asUtc = Date.UTC(
+    Number(values.year),
+    Number(values.month) - 1,
+    Number(values.day),
+    Number(values.hour),
+    Number(values.minute),
+    Number(values.second),
+  )
+
+  return asUtc - timestamp
+}
+
+export function nzLocalToIso(date: string, time: string) {
+  const [year, month, day] = date.split('-').map(Number)
+  const [hour, minute] = time.split(':').map(Number)
+  const wallClockUtc = Date.UTC(year, month - 1, day, hour, minute, 0)
+  const timeZone = 'Pacific/Auckland'
+  const firstOffset = getTimeZoneOffset(wallClockUtc, timeZone)
+  const firstCandidate = wallClockUtc - firstOffset
+  const secondOffset = getTimeZoneOffset(firstCandidate, timeZone)
+  return new Date(wallClockUtc - secondOffset).toISOString()
+}
