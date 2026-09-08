@@ -7,7 +7,8 @@ import {
   LogOut,
   Users,
 } from 'lucide-react'
-import { FormEvent, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import type { FormEvent } from 'react'
 import { siteConfig } from '../config/site'
 import { formatNzDateTime, nzDateString } from '../lib/beetitApi'
 import { useSeo } from '../lib/seo'
@@ -150,18 +151,23 @@ export function Admin() {
   }, [])
 
   useEffect(() => {
-    checkAdmin()
+    queueMicrotask(() => {
+      void checkAdmin()
+    })
 
     if (!supabase) return
     const { data: listener } = supabase.auth.onAuthStateChange(() => {
-      checkAdmin()
+      void checkAdmin()
     })
 
     return () => listener.subscription.unsubscribe()
   }, [checkAdmin])
 
   useEffect(() => {
-    if (profile) loadDashboard()
+    if (!profile) return
+    queueMicrotask(() => {
+      void loadDashboard()
+    })
   }, [profile, loadDashboard])
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
