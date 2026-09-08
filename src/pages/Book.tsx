@@ -1,5 +1,5 @@
 import { CalendarDays, CheckCircle2, Clock3, LoaderCircle } from 'lucide-react'
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { siteConfig } from '../config/site'
 import {
   AvailableSlot,
@@ -25,33 +25,23 @@ export function Book() {
     path: '/book',
   })
 
-  useEffect(() => {
-    if (!date) {
-      setSlots([])
-      setSelectedStartAt('')
-      return
-    }
-
-    let active = true
-    setLoadingSlots(true)
-    setError('')
+  async function handleDateChange(nextDate: string) {
+    setDate(nextDate)
+    setSlots([])
     setSelectedStartAt('')
+    setError('')
 
-    getAvailableSlots(date)
-      .then((available) => {
-        if (active) setSlots(available)
-      })
-      .catch(() => {
-        if (active) setError('We could not load the available times. Please try again.')
-      })
-      .finally(() => {
-        if (active) setLoadingSlots(false)
-      })
+    if (!nextDate) return
 
-    return () => {
-      active = false
+    try {
+      setLoadingSlots(true)
+      setSlots(await getAvailableSlots(nextDate))
+    } catch {
+      setError('We could not load the available times. Please try again.')
+    } finally {
+      setLoadingSlots(false)
     }
-  }, [date])
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -89,9 +79,7 @@ export function Book() {
       const message = bookingError instanceof Error ? bookingError.message : 'We could not submit your booking.'
       setError(message.includes('taken') || message.includes('available') ? message : 'We could not submit your booking. Please check the details and try again.')
 
-      if (date) {
-        getAvailableSlots(date).then(setSlots).catch(() => undefined)
-      }
+      if (date) getAvailableSlots(date).then(setSlots).catch(() => undefined)
     } finally {
       setSubmitting(false)
     }
@@ -129,12 +117,7 @@ export function Book() {
               <span>{success}</span>
             </div>
           )}
-
-          {error && (
-            <div className="form-status error" role="alert">
-              <span>{error}</span>
-            </div>
-          )}
+          {error && <div className="form-status error" role="alert">{error}</div>}
 
           <div className="field-grid two-column">
             <label>
@@ -178,7 +161,7 @@ export function Book() {
               type="date"
               min={nzDateString()}
               value={date}
-              onChange={(event) => setDate(event.target.value)}
+              onChange={(event) => void handleDateChange(event.target.value)}
               required
             />
           </label>
