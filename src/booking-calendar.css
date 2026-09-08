@@ -109,7 +109,7 @@
   justify-items: stretch;
   align-content: start;
   gap: 3px;
-  padding: 12px 10px;
+  padding: 12px 6px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--paper);
@@ -161,6 +161,7 @@
 
 .availability-weekday,
 .availability-month {
+  padding-inline: 4px;
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 750;
@@ -169,6 +170,7 @@
 
 .availability-day strong {
   margin-top: 2px;
+  padding-inline: 4px;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.7rem;
   font-weight: 500;
@@ -189,20 +191,22 @@
 }
 
 .availability-status {
-  width: 68px;
+  width: 100%;
+  max-width: 72px;
   height: 30px;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   justify-self: center;
   gap: 4px;
   margin-top: auto;
-  padding: 0 6px;
+  padding: 0 4px;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 850;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.015em;
   line-height: 1;
   text-align: center;
   text-transform: uppercase;
@@ -272,10 +276,11 @@
 
   .availability-day {
     min-height: 108px;
+    padding-inline: 10px;
   }
 
   .availability-status {
-    width: 76px;
+    max-width: 82px;
     height: 32px;
     font-size: 0.66rem;
   }
