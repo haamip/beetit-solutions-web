@@ -1,5 +1,12 @@
-import { CalendarDays, CheckCircle2, Clock3, LoaderCircle } from 'lucide-react'
-import { useState } from 'react'
+import {
+  CalendarDays,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  LoaderCircle,
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { siteConfig } from '../config/site'
 import {
@@ -11,7 +18,54 @@ import {
 import type { AvailableSlot } from '../lib/beetitApi'
 import { useSeo } from '../lib/seo'
 
+type DayStatus = 'free' | 'limited' | 'full' | 'closed' | 'loading'
+
+function addDays(dateString: string, amount: number) {
+  const [year, month, day] = dateString.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day + amount, 12))
+  return date.toISOString().slice(0, 10)
+}
+
+function weekday(dateString: string) {
+  const [year, month, day] = dateString.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day, 12)).getUTCDay()
+}
+
+function isOnlineBookingDay(dateString: string) {
+  const day = weekday(dateString)
+  return day >= 1 && day <= 4
+}
+
+function formatCalendarDay(dateString: string) {
+  const [year, month, day] = dateString.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day, 12))
+  return {
+    weekday: new Intl.DateTimeFormat('en-NZ', { weekday: 'short', timeZone: 'UTC' }).format(date),
+    day: new Intl.DateTimeFormat('en-NZ', { day: 'numeric', timeZone: 'UTC' }).format(date),
+    month: new Intl.DateTimeFormat('en-NZ', { month: 'short', timeZone: 'UTC' }).format(date),
+  }
+}
+
+function getDayStatus(dateString: string, slots: AvailableSlot[] | undefined): DayStatus {
+  if (!isOnlineBookingDay(dateString)) return 'closed'
+  if (slots === undefined) return 'loading'
+  if (slots.length === 0) return 'full'
+  if (slots.length <= 3) return 'limited'
+  return 'free'
+}
+
+const statusLabel: Record<DayStatus, string> = {
+  free: 'Free',
+  limited: 'Limited',
+  full: 'Full',
+  closed: 'Closed',
+  loading: 'Checking',
+}
+
 export function Book() {
+  const today = nzDateString()
+  const [windowStart, setWindowStart] = useState(today)
+  const [availability, setAvailability] = useState<Record<string, AvailableSlot[]>>({})
   const [date, setDate] = useState('')
   const [slots, setSlots] = useState<AvailableSlot[]>([])
   const [selectedStartAt, setSelectedStartAt] = useState('')
@@ -26,6 +80,41 @@ export function Book() {
     path: '/book',
   })
 
+  const calendarDates = useMemo(
+    () => Array.from({ length: 14 }, (_, index) => addDays(windowStart, index)),
+    [windowStart],
+  )
+
+  const rangeLabel = useMemo(() => {
+    const first = formatCalendarDay(calendarDates[0])
+    const last = formatCalendarDay(calendarDates[calendarDates.length - 1])
+    return `${first.day} ${first.month} to ${last.day} ${last.month}`
+  }, [calendarDates])
+
+  useEffect(() => {
+    let cancelled = false
+
+    queueMicrotask(() => {
+      const openDates = calendarDates.filter(isOnlineBookingDay)
+
+      Promise.all(
+        openDates.map(async (calendarDate) => {
+          try {
+            return [calendarDate, await getAvailableSlots(calendarDate)] as const
+          } catch {
+            return [calendarDate, []] as const
+          }
+        }),
+      ).then((entries) => {
+        if (!cancelled) setAvailability((current) => ({ ...current, ...Object.fromEntries(entries) }))
+      })
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [calendarDates])
+
   async function handleDateChange(nextDate: string) {
     setDate(nextDate)
     setSlots([])
@@ -34,14 +123,31 @@ export function Book() {
 
     if (!nextDate) return
 
+    const cached = availability[nextDate]
+    if (cached !== undefined) {
+      setSlots(cached)
+      return
+    }
+
     try {
       setLoadingSlots(true)
-      setSlots(await getAvailableSlots(nextDate))
+      const nextSlots = await getAvailableSlots(nextDate)
+      setSlots(nextSlots)
+      setAvailability((current) => ({ ...current, [nextDate]: nextSlots }))
     } catch {
       setError('We could not load the available times. Please try again.')
     } finally {
       setLoadingSlots(false)
     }
+  }
+
+  function goBackOneWeek() {
+    const previous = addDays(windowStart, -7)
+    setWindowStart(previous < today ? today : previous)
+  }
+
+  function goForwardOneWeek() {
+    setWindowStart(addDays(windowStart, 7))
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -76,11 +182,23 @@ export function Book() {
       setDate('')
       setSlots([])
       setSelectedStartAt('')
+      setAvailability((current) => {
+        const copy = { ...current }
+        delete copy[date]
+        return copy
+      })
     } catch (bookingError) {
       const message = bookingError instanceof Error ? bookingError.message : 'We could not submit your booking.'
       setError(message.includes('taken') || message.includes('available') ? message : 'We could not submit your booking. Please check the details and try again.')
 
-      if (date) getAvailableSlots(date).then(setSlots).catch(() => undefined)
+      if (date) {
+        getAvailableSlots(date)
+          .then((nextSlots) => {
+            setSlots(nextSlots)
+            setAvailability((current) => ({ ...current, [date]: nextSlots }))
+          })
+          .catch(() => undefined)
+      }
     } finally {
       setSubmitting(false)
     }
@@ -93,7 +211,7 @@ export function Book() {
           <p className="eyebrow">Book a consultation</p>
           <h1>Choose a time that works for you.</h1>
           <p>
-            Consultations are 60 minutes. Choose a date to see Donna's live availability. Friday appointments are by arrangement through the contact page.
+            Consultations are 60 minutes. The calendar shows Donna's live availability so people can see at a glance which days are free, limited, full or closed.
           </p>
           <div className="info-card">
             <CalendarDays size={22} />
@@ -111,7 +229,7 @@ export function Book() {
           </div>
         </div>
 
-        <form className="form-card" onSubmit={handleSubmit}>
+        <form className="form-card booking-form-card" onSubmit={handleSubmit}>
           {success && (
             <div className="form-status success" role="status">
               <CheckCircle2 size={20} />
@@ -155,28 +273,75 @@ export function Book() {
             </select>
           </label>
 
-          <label>
-            Preferred date
-            <input
-              name="preferredDate"
-              type="date"
-              min={nzDateString()}
-              value={date}
-              onChange={(event) => void handleDateChange(event.target.value)}
-              required
-            />
-          </label>
+          <div className="availability-calendar">
+            <div className="availability-calendar-header">
+              <div>
+                <span className="calendar-kicker">Live availability</span>
+                <strong>{rangeLabel}</strong>
+              </div>
+              <div className="calendar-controls">
+                <button
+                  type="button"
+                  aria-label="Previous week"
+                  onClick={goBackOneWeek}
+                  disabled={windowStart === today}
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button type="button" aria-label="Next week" onClick={goForwardOneWeek}>
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div className="calendar-legend" aria-label="Availability legend">
+              <span><i className="legend-dot free" /> Free</span>
+              <span><i className="legend-dot limited" /> Limited</span>
+              <span><i className="legend-dot full" /> Full</span>
+              <span><i className="legend-dot closed" /> Closed</span>
+            </div>
+
+            <div className="availability-day-grid">
+              {calendarDates.map((calendarDate) => {
+                const display = formatCalendarDay(calendarDate)
+                const daySlots = availability[calendarDate]
+                const status = getDayStatus(calendarDate, daySlots)
+                const disabled = status === 'closed' || status === 'full' || status === 'loading'
+                const selected = date === calendarDate
+
+                return (
+                  <button
+                    key={calendarDate}
+                    className={`availability-day ${status}${selected ? ' selected' : ''}`}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => void handleDateChange(calendarDate)}
+                  >
+                    <span className="availability-weekday">{display.weekday}</span>
+                    <strong>{display.day}</strong>
+                    <span className="availability-month">{display.month}</span>
+                    <span className={`availability-status ${status}`}>
+                      {status === 'loading' ? <LoaderCircle className="spin" size={13} /> : null}
+                      {statusLabel[status]}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <input name="preferredDate" type="hidden" value={date} />
 
           <fieldset className="slot-fieldset">
-            <legend>Available times</legend>
-            {!date && <p className="slot-help">Choose a date first.</p>}
+            <legend>{date ? `Available times for ${formatCalendarDay(date).weekday} ${formatCalendarDay(date).day} ${formatCalendarDay(date).month}` : 'Available times'}</legend>
+            {!date && <p className="slot-help">Choose a day marked Free or Limited above.</p>}
             {loadingSlots && (
               <div className="slot-loading">
                 <LoaderCircle className="spin" size={18} /> Loading available times
               </div>
             )}
             {date && !loadingSlots && slots.length === 0 && (
-              <p className="slot-help">No online times are available for this date. Online bookings are Monday to Thursday.</p>
+              <p className="slot-help">That day is now fully booked. Choose another available day.</p>
             )}
             {slots.length > 0 && (
               <div className="slot-grid">
@@ -187,7 +352,8 @@ export function Book() {
                     type="button"
                     onClick={() => setSelectedStartAt(slot.start_at)}
                   >
-                    {formatNzTime(slot.start_at)}
+                    <span>{formatNzTime(slot.start_at)}</span>
+                    <small>Free</small>
                   </button>
                 ))}
               </div>
