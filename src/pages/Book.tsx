@@ -1,13 +1,14 @@
 import { CalendarDays, CheckCircle2, Clock3, LoaderCircle } from 'lucide-react'
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { siteConfig } from '../config/site'
 import {
-  AvailableSlot,
   formatNzTime,
   getAvailableSlots,
   nzDateString,
   submitBooking,
 } from '../lib/beetitApi'
+import type { AvailableSlot } from '../lib/beetitApi'
 import { useSeo } from '../lib/seo'
 
 export function Book() {
