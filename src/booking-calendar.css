@@ -189,19 +189,20 @@
 }
 
 .availability-status {
-  width: 100%;
-  min-width: 0;
+  width: 68px;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  justify-self: center;
   gap: 4px;
   margin-top: auto;
-  padding: 5px 5px;
+  padding: 0 6px;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-size: clamp(0.56rem, 0.68vw, 0.66rem);
+  font-size: 0.65rem;
   font-weight: 850;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.025em;
   line-height: 1;
   text-align: center;
   text-transform: uppercase;
@@ -270,13 +271,12 @@
   }
 
   .availability-day {
-    min-height: 104px;
+    min-height: 108px;
   }
 
   .availability-status {
-    width: auto;
-    justify-self: start;
-    padding-inline: 9px;
-    font-size: 0.64rem;
+    width: 76px;
+    height: 32px;
+    font-size: 0.66rem;
   }
 }
