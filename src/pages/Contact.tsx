@@ -1,5 +1,6 @@
 import { CheckCircle2, Mail, MapPin, Phone } from 'lucide-react'
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { siteConfig } from '../config/site'
 import { submitContact } from '../lib/beetitApi'
 import { useSeo } from '../lib/seo'
