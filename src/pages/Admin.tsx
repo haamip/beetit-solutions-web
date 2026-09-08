@@ -1,16 +1,16 @@
 import {
-  Bell,
   CalendarDays,
-  Inbox,
-  LoaderCircle,
+  LayoutDashboard,
   LockKeyhole,
   LogOut,
+  Menu,
   Users,
+  X,
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import { NavLink, Outlet } from 'react-router-dom'
 import { siteConfig } from '../config/site'
-import { formatNzDateTime, nzDateString } from '../lib/beetitApi'
 import { useSeo } from '../lib/seo'
 import { supabase } from '../lib/supabase'
 
@@ -20,39 +20,19 @@ type AdminProfile = {
   full_name: string | null
 }
 
-type Booking = {
-  id: string
-  full_name: string
-  service: string
-  start_at: string
-  status: string
-  consultation_type: string
-}
-
-type Notification = {
-  id: string
-  title: string
-  body: string | null
-  read_at: string | null
-  created_at: string
-}
-
-type DashboardData = {
-  bookings: Booking[]
-  clientCount: number
-  unreadInquiryCount: number
-  upcomingCount: number
-  notifications: Notification[]
-}
+const adminNav = [
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/admin/bookings', label: 'Bookings', icon: CalendarDays },
+  { to: '/admin/calendar', label: 'Calendar', icon: CalendarDays },
+  { to: '/admin/clients', label: 'Clients', icon: Users },
+]
 
 export function Admin() {
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [profile, setProfile] = useState<AdminProfile | null>(null)
   const [loginSent, setLoginSent] = useState(false)
   const [loginError, setLoginError] = useState('')
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null)
-  const [dashboardError, setDashboardError] = useState('')
-  const [loadingDashboard, setLoadingDashboard] = useState(false)
+  const [navOpen, setNavOpen] = useState(false)
 
   useSeo({
     title: 'Admin',
@@ -60,60 +40,6 @@ export function Admin() {
     path: '/admin',
     noIndex: true,
   })
-
-  const loadDashboard = useCallback(async () => {
-    if (!supabase) return
-
-    setLoadingDashboard(true)
-    setDashboardError('')
-
-    try {
-      const now = new Date().toISOString()
-      const [bookingsResult, clientsResult, inquiriesResult, upcomingResult, notificationsResult] = await Promise.all([
-        supabase
-          .from('bookings')
-          .select('id, full_name, service, start_at, status, consultation_type')
-          .gte('start_at', now)
-          .in('status', ['pending', 'confirmed', 'rescheduled'])
-          .order('start_at', { ascending: true })
-          .limit(12),
-        supabase.from('clients').select('id', { count: 'exact', head: true }),
-        supabase.from('contact_inquiries').select('id', { count: 'exact', head: true }).eq('status', 'unread'),
-        supabase
-          .from('bookings')
-          .select('id', { count: 'exact', head: true })
-          .gte('start_at', now)
-          .in('status', ['pending', 'confirmed', 'rescheduled']),
-        supabase
-          .from('admin_notifications')
-          .select('id, title, body, read_at, created_at')
-          .order('created_at', { ascending: false })
-          .limit(8),
-      ])
-
-      const firstError = [
-        bookingsResult.error,
-        clientsResult.error,
-        inquiriesResult.error,
-        upcomingResult.error,
-        notificationsResult.error,
-      ].find(Boolean)
-
-      if (firstError) throw firstError
-
-      setDashboard({
-        bookings: (bookingsResult.data ?? []) as Booking[],
-        clientCount: clientsResult.count ?? 0,
-        unreadInquiryCount: inquiriesResult.count ?? 0,
-        upcomingCount: upcomingResult.count ?? 0,
-        notifications: (notificationsResult.data ?? []) as Notification[],
-      })
-    } catch {
-      setDashboardError('The dashboard could not be loaded. Please refresh and try again.')
-    } finally {
-      setLoadingDashboard(false)
-    }
-  }, [])
 
   const checkAdmin = useCallback(async () => {
     if (!supabase) {
@@ -127,7 +53,6 @@ export function Admin() {
 
     if (!user) {
       setProfile(null)
-      setDashboard(null)
       setCheckingAuth(false)
       return
     }
@@ -163,13 +88,6 @@ export function Admin() {
     return () => listener.subscription.unsubscribe()
   }, [checkAdmin])
 
-  useEffect(() => {
-    if (!profile) return
-    queueMicrotask(() => {
-      void loadDashboard()
-    })
-  }, [profile, loadDashboard])
-
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setLoginError('')
@@ -201,14 +119,13 @@ export function Admin() {
     if (!supabase) return
     await supabase.auth.signOut()
     setProfile(null)
-    setDashboard(null)
   }
 
   if (checkingAuth) {
     return (
       <section className="page-section admin-page">
         <div className="admin-card admin-loading">
-          <LoaderCircle className="spin" size={30} />
+          <LockKeyhole size={30} />
           <p>Checking secure access…</p>
         </div>
       </section>
@@ -244,106 +161,59 @@ export function Admin() {
     )
   }
 
-  const today = nzDateString()
-  const todayBookings = dashboard?.bookings.filter((booking) => nzDateString(new Date(booking.start_at)) === today) ?? []
-
   return (
-    <section className="admin-dashboard-section">
-      <div className="container admin-dashboard">
-        <div className="admin-dashboard-header">
+    <div className="admin-shell">
+      <aside className={navOpen ? 'admin-sidebar open' : 'admin-sidebar'}>
+        <div className="admin-brand">
+          <div className="brand-mark">B</div>
           <div>
-            <p className="eyebrow">Beet It Solutions</p>
-            <h1>Kia ora, {profile.full_name?.split(' ')[0] ?? 'Donna'}.</h1>
-            <p>Bookings, enquiries and client activity are now connected to the live Supabase database.</p>
+            <strong>Beet It Solutions</strong>
+            <span>Secure Administration</span>
           </div>
-          <button className="button secondary" type="button" onClick={handleSignOut}>
-            <LogOut size={17} /> Sign out
+          <button className="admin-nav-close" type="button" aria-label="Close admin navigation" onClick={() => setNavOpen(false)}>
+            <X size={21} />
           </button>
         </div>
 
-        {dashboardError && <div className="form-status error">{dashboardError}</div>}
+        <nav className="admin-nav" aria-label="Admin navigation">
+          {adminNav.map((item) => {
+            const Icon = item.icon
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                onClick={() => setNavOpen(false)}
+              >
+                <Icon size={19} />
+                <span>{item.label}</span>
+              </NavLink>
+            )
+          })}
+        </nav>
 
-        <div className="dashboard-stat-grid">
-          <article className="dashboard-stat">
-            <CalendarDays size={22} />
-            <span>Today's bookings</span>
-            <strong>{todayBookings.length}</strong>
-          </article>
-          <article className="dashboard-stat">
-            <CalendarDays size={22} />
-            <span>Upcoming bookings</span>
-            <strong>{dashboard?.upcomingCount ?? 0}</strong>
-          </article>
-          <article className="dashboard-stat">
-            <Inbox size={22} />
-            <span>New enquiries</span>
-            <strong>{dashboard?.unreadInquiryCount ?? 0}</strong>
-          </article>
-          <article className="dashboard-stat">
-            <Users size={22} />
-            <span>Total clients</span>
-            <strong>{dashboard?.clientCount ?? 0}</strong>
-          </article>
+        <div className="admin-sidebar-footer">
+          <span>Signed in as</span>
+          <strong>{profile.full_name ?? profile.email}</strong>
+          <button type="button" onClick={handleSignOut}>
+            <LogOut size={17} /> Sign out
+          </button>
         </div>
+      </aside>
 
-        {loadingDashboard ? (
-          <div className="dashboard-loading"><LoaderCircle className="spin" size={22} /> Loading dashboard…</div>
-        ) : (
-          <div className="dashboard-grid">
-            <section className="dashboard-panel">
-              <div className="dashboard-panel-heading">
-                <div>
-                  <p className="eyebrow">Calendar</p>
-                  <h2>Upcoming bookings</h2>
-                </div>
-                <button className="text-button" type="button" onClick={loadDashboard}>Refresh</button>
-              </div>
+      {navOpen && <button className="admin-nav-backdrop" type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)} />}
 
-              {dashboard?.bookings.length ? (
-                <div className="booking-list">
-                  {dashboard.bookings.map((booking) => (
-                    <article className="booking-list-item" key={booking.id}>
-                      <div>
-                        <strong>{booking.full_name}</strong>
-                        <span>{booking.service}</span>
-                      </div>
-                      <div className="booking-list-meta">
-                        <strong>{formatNzDateTime(booking.start_at)}</strong>
-                        <span>{booking.consultation_type} · {booking.status}</span>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <p>No upcoming bookings yet.</p>
-              )}
-            </section>
-
-            <aside className="dashboard-panel notifications-panel">
-              <div className="dashboard-panel-heading">
-                <div>
-                  <p className="eyebrow">Activity</p>
-                  <h2>Notifications</h2>
-                </div>
-                <Bell size={21} />
-              </div>
-
-              {dashboard?.notifications.length ? (
-                <div className="notification-list">
-                  {dashboard.notifications.map((notification) => (
-                    <article className={notification.read_at ? 'notification-item' : 'notification-item unread'} key={notification.id}>
-                      <strong>{notification.title}</strong>
-                      {notification.body && <p>{notification.body}</p>}
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <p>No notifications yet.</p>
-              )}
-            </aside>
-          </div>
-        )}
+      <div className="admin-main">
+        <header className="admin-mobile-header">
+          <button type="button" aria-label="Open admin navigation" onClick={() => setNavOpen(true)}>
+            <Menu size={22} />
+          </button>
+          <strong>Beet It Admin</strong>
+        </header>
+        <main className="admin-content">
+          <Outlet context={{ profile }} />
+        </main>
       </div>
-    </section>
+    </div>
   )
 }
