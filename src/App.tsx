@@ -16,6 +16,7 @@ import { AdminClientDetail } from './pages/admin/AdminClientDetail'
 import { AdminClients } from './pages/admin/AdminClients'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AdminEnquiries } from './pages/admin/AdminEnquiries'
+import { AdminHelp } from './pages/admin/AdminHelp'
 import { AdminSettings } from './pages/admin/AdminSettings'
 
 const approvedAdminEmails = new Set([
@@ -91,6 +92,7 @@ function App() {
           <Route path="enquiries" element={<AdminEnquiries />} />
           <Route path="clients" element={<AdminClients />} />
           <Route path="clients/:clientId" element={<AdminClientDetail />} />
+          <Route path="help" element={<AdminHelp />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>
