@@ -31,7 +31,9 @@ type DashboardData = {
 export function AdminDashboard() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(true)
+  const [clearingNotifications, setClearingNotifications] = useState(false)
 
   const loadDashboard = useCallback(async () => {
     if (!supabase) return
@@ -93,6 +95,29 @@ export function AdminDashboard() {
     })
   }, [loadDashboard])
 
+  async function clearNotifications() {
+    if (!supabase || !dashboard?.notifications.length || clearingNotifications) return
+    if (!window.confirm('Clear all admin notifications? This removes them from the activity list.')) return
+
+    setClearingNotifications(true)
+    setError('')
+    setNotice('')
+
+    const { error: deleteError } = await supabase
+      .from('admin_notifications')
+      .delete()
+      .gte('created_at', '1970-01-01T00:00:00.000Z')
+
+    if (deleteError) {
+      setError('Notifications could not be cleared.')
+    } else {
+      setDashboard((current) => current ? { ...current, notifications: [] } : current)
+      setNotice('Notifications cleared.')
+    }
+
+    setClearingNotifications(false)
+  }
+
   const today = nzDateString()
   const todayBookings = dashboard?.bookings.filter((booking) => nzDateString(new Date(booking.start_at)) === today) ?? []
 
@@ -108,6 +133,7 @@ export function AdminDashboard() {
       </div>
 
       {error && <div className="form-status error">{error}</div>}
+      {notice && <div className="form-status success">{notice}</div>}
 
       <div className="dashboard-stat-grid">
         <article className="dashboard-stat">
@@ -170,7 +196,13 @@ export function AdminDashboard() {
                 <p className="eyebrow">Activity</p>
                 <h2>Notifications</h2>
               </div>
-              <Bell size={21} />
+              {dashboard?.notifications.length ? (
+                <button className="text-button" type="button" onClick={() => void clearNotifications()} disabled={clearingNotifications}>
+                  {clearingNotifications ? 'Clearing…' : 'Clear all'}
+                </button>
+              ) : (
+                <Bell size={21} />
+              )}
             </div>
 
             {dashboard?.notifications.length ? (
