@@ -23,7 +23,7 @@ async function hashToken(token: string) {
 function safeOrigin(value: unknown) {
   try {
     const parsed = new URL(String(value ?? ""));
-    if (!['http:', 'https:'].includes(parsed.protocol)) return null;
+    if (!["http:", "https:"].includes(parsed.protocol)) return null;
     return parsed.origin;
   } catch {
     return null;
@@ -72,19 +72,14 @@ Deno.serve(async (req: Request) => {
     if (clientError || !client) return json({ error: "Client not found" }, 404);
     if (!client.email) return json({ error: "This client does not have an email address" }, 400);
 
-    const token = `${crypto.randomUUID().replaceAll('-', '')}${crypto.randomUUID().replaceAll('-', '')}`;
+    const token = `${crypto.randomUUID().replaceAll("-", "")}${crypto.randomUUID().replaceAll("-", "")}`;
     const tokenHash = await hashToken(token);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     const uploadUrl = `${origin}/client-id/${token}`;
 
     const { data: link, error: linkError } = await admin
       .from("client_upload_links")
-      .insert({
-        client_id: client.id,
-        token_hash: tokenHash,
-        expires_at: expiresAt,
-        created_by: user.id,
-      })
+      .insert({ client_id: client.id, token_hash: tokenHash, expires_at: expiresAt, created_by: user.id })
       .select("id")
       .single();
 
@@ -94,9 +89,7 @@ Deno.serve(async (req: Request) => {
     const from = Deno.env.get("BEETIT_EMAIL_FROM") || "Beet It Solutions <beetit@haktindustries.co.nz>";
     const replyTo = Deno.env.get("BEETIT_EMAIL_REPLY_TO") || "beetit.solutions@gmail.com";
 
-    if (!resendApiKey) {
-      return json({ sent: false, reason: "email_not_configured", uploadUrl, email: client.email, expiresAt });
-    }
+    if (!resendApiKey) return json({ sent: false, reason: "email_not_configured", uploadUrl, email: client.email, expiresAt });
 
     const firstName = String(client.full_name || "there").trim().split(/\s+/)[0] || "there";
     const html = `
@@ -112,24 +105,14 @@ Deno.serve(async (req: Request) => {
 
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from,
-        to: [client.email],
-        reply_to: replyTo,
-        subject: "Secure ID upload – Beet It Solutions",
-        html,
-      }),
+      headers: { "Authorization": `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to: [client.email], reply_to: replyTo, subject: "Secure ID upload – Beet It Solutions", html }),
     });
 
-    if (!emailResponse.ok) {
-      return json({ sent: false, reason: "email_failed", uploadUrl, email: client.email, expiresAt });
-    }
+    if (!emailResponse.ok) return json({ sent: false, reason: "email_failed", uploadUrl, email: client.email, expiresAt });
 
     await admin.from("admin_notifications").insert({
+      notification_type: "identity_link_sent",
       title: "ID upload link emailed",
       body: `Secure ID upload link sent to ${client.full_name} at ${client.email}.`,
     });
