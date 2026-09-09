@@ -1,7 +1,8 @@
-import { CalendarDays, Check, Clock3, LoaderCircle, UserPlus, X } from 'lucide-react'
+import { CalendarClock, CalendarDays, Check, Clock3, LoaderCircle, UserPlus, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { formatNzDateTime } from '../../lib/beetitApi'
+import { formatNzDateTime, formatNzTime, getAvailableSlots, nzDateString } from '../../lib/beetitApi'
+import type { AvailableSlot } from '../../lib/beetitApi'
 import { supabase } from '../../lib/supabase'
 
 type BookingStatus = 'pending' | 'confirmed' | 'rescheduled' | 'cancelled' | 'completed'
@@ -22,10 +23,17 @@ type Booking = {
   created_at: string
 }
 
+type ManageBookingResponse = {
+  booking?: Partial<Booking> & { id: string }
+  emailSent?: boolean
+  error?: string
+}
+
 const filters: Array<{ value: 'active' | BookingStatus | 'all'; label: string }> = [
   { value: 'active', label: 'Active' },
   { value: 'pending', label: 'Pending' },
   { value: 'confirmed', label: 'Confirmed' },
+  { value: 'rescheduled', label: 'Rescheduled' },
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },
   { value: 'all', label: 'All' },
@@ -36,6 +44,11 @@ export function AdminBookings() {
   const [filter, setFilter] = useState<'active' | BookingStatus | 'all'>('active')
   const [loading, setLoading] = useState(true)
   const [workingId, setWorkingId] = useState('')
+  const [reschedulingId, setReschedulingId] = useState('')
+  const [rescheduleDate, setRescheduleDate] = useState('')
+  const [rescheduleSlots, setRescheduleSlots] = useState<AvailableSlot[]>([])
+  const [rescheduleStartAt, setRescheduleStartAt] = useState('')
+  const [loadingReschedule, setLoadingReschedule] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
 
@@ -50,49 +63,96 @@ export function AdminBookings() {
       .select('id, client_id, full_name, email, phone, service, consultation_type, start_at, end_at, important_date, message, status, created_at')
       .order('start_at', { ascending: true })
 
-    if (queryError) {
-      setError('Bookings could not be loaded.')
-    } else {
-      setBookings((data ?? []) as Booking[])
-    }
+    if (queryError) setError('Bookings could not be loaded.')
+    else setBookings((data ?? []) as Booking[])
 
     setLoading(false)
   }, [])
 
   useEffect(() => {
-    queueMicrotask(() => {
-      void loadBookings()
-    })
+    queueMicrotask(() => void loadBookings())
   }, [loadBookings])
 
   const visibleBookings = useMemo(() => {
     if (filter === 'all') return bookings
-    if (filter === 'active') {
-      return bookings.filter((booking) => ['pending', 'confirmed', 'rescheduled'].includes(booking.status))
-    }
+    if (filter === 'active') return bookings.filter((booking) => ['pending', 'confirmed', 'rescheduled'].includes(booking.status))
     return bookings.filter((booking) => booking.status === filter)
   }, [bookings, filter])
 
-  async function updateStatus(id: string, status: BookingStatus) {
-    if (!supabase) return
+  async function getInvokeErrorMessage(error: unknown, fallback: string) {
+    const typed = error as { message?: string; context?: Response }
+    let message = typed.message || fallback
+    if (typed.context) {
+      try {
+        const detail = await typed.context.clone().json() as { error?: string }
+        if (detail.error) message = detail.error
+      } catch {
+        // Keep the fallback.
+      }
+    }
+    return message
+  }
 
-    setWorkingId(id)
+  async function manageBooking(booking: Booking, action: 'confirm' | 'cancel' | 'complete' | 'reschedule', startAt?: string) {
+    if (!supabase) return false
+    if (action === 'cancel' && !window.confirm(`Cancel ${booking.full_name}'s booking? The client will be emailed automatically.`)) return false
+
+    setWorkingId(booking.id)
     setError('')
     setNotice('')
 
-    const { error: updateError } = await supabase
-      .from('bookings')
-      .update({ status })
-      .eq('id', id)
+    const { data, error: invokeError } = await supabase.functions.invoke<ManageBookingResponse>('manage-booking', {
+      body: { bookingId: booking.id, action, startAt },
+    })
 
-    if (updateError) {
-      setError('That booking could not be updated.')
-    } else {
-      setBookings((current) => current.map((booking) => booking.id === id ? { ...booking, status } : booking))
-      setNotice(`Booking marked ${status}.`)
+    if (invokeError || data?.error || !data?.booking) {
+      setError(data?.error || await getInvokeErrorMessage(invokeError, 'That booking could not be updated.'))
+      setWorkingId('')
+      return false
     }
 
+    setBookings((current) => current.map((item) => item.id === booking.id ? { ...item, ...data.booking } as Booking : item))
+    const label = action === 'confirm' ? 'confirmed' : action === 'cancel' ? 'cancelled' : action === 'complete' ? 'completed' : 'rescheduled'
+    const emailNote = action === 'complete' ? '' : data.emailSent ? ' The client was emailed.' : ' The booking changed, but the client email could not be confirmed.'
+    setNotice(`Booking ${label}.${emailNote}`)
     setWorkingId('')
+    return true
+  }
+
+  async function loadRescheduleSlots(date: string) {
+    setRescheduleDate(date)
+    setRescheduleStartAt('')
+    setRescheduleSlots([])
+    if (!date) return
+    setLoadingReschedule(true)
+    setError('')
+    try {
+      setRescheduleSlots(await getAvailableSlots(date))
+    } catch {
+      setError('Available reschedule times could not be loaded.')
+    } finally {
+      setLoadingReschedule(false)
+    }
+  }
+
+  async function beginReschedule(booking: Booking) {
+    const initialDate = nzDateString(new Date(booking.start_at))
+    setReschedulingId(booking.id)
+    await loadRescheduleSlots(initialDate < nzDateString() ? nzDateString() : initialDate)
+  }
+
+  async function submitReschedule(booking: Booking) {
+    if (!rescheduleStartAt) {
+      setError('Choose a new available time first.')
+      return
+    }
+    const changed = await manageBooking(booking, 'reschedule', rescheduleStartAt)
+    if (changed) {
+      setReschedulingId('')
+      setRescheduleDate('')
+      setRescheduleSlots([])
+      setRescheduleStartAt('')
+    }
   }
 
   async function convertToClient(booking: Booking) {
@@ -106,7 +166,7 @@ export function AdminBookings() {
       const { data: existingClient, error: existingError } = await supabase
         .from('clients')
         .select('id')
-        .eq('email', booking.email.toLowerCase())
+        .ilike('email', booking.email)
         .limit(1)
         .maybeSingle()
 
@@ -132,11 +192,7 @@ export function AdminBookings() {
         clientId = createdClient.id as string
       }
 
-      const { error: linkError } = await supabase
-        .from('bookings')
-        .update({ client_id: clientId })
-        .eq('id', booking.id)
-
+      const { error: linkError } = await supabase.from('bookings').update({ client_id: clientId }).eq('id', booking.id)
       if (linkError) throw linkError
 
       setBookings((current) => current.map((item) => item.id === booking.id ? { ...item, client_id: clientId ?? null } : item))
@@ -154,7 +210,7 @@ export function AdminBookings() {
         <div>
           <p className="eyebrow">Booking management</p>
           <h1>Bookings</h1>
-          <p>Review requests, confirm appointments and turn a booking into a client record when needed.</p>
+          <p>Review requests, confirm appointments, reschedule when needed and keep the client informed automatically.</p>
         </div>
         <button className="button secondary" type="button" onClick={loadBookings}>Refresh</button>
       </div>
@@ -164,12 +220,7 @@ export function AdminBookings() {
 
       <div className="admin-filter-row" role="group" aria-label="Booking filters">
         {filters.map((item) => (
-          <button
-            key={item.value}
-            className={filter === item.value ? 'filter-button active' : 'filter-button'}
-            type="button"
-            onClick={() => setFilter(item.value)}
-          >
+          <button key={item.value} className={filter === item.value ? 'filter-button active' : 'filter-button'} type="button" onClick={() => setFilter(item.value)}>
             {item.label}
           </button>
         ))}
@@ -201,10 +252,35 @@ export function AdminBookings() {
                   {booking.important_date && <div><span>Important date</span><strong>{booking.important_date}</strong></div>}
                 </div>
 
-                {booking.message && (
-                  <div className="booking-message">
-                    <span>Client message</span>
-                    <p>{booking.message}</p>
+                {booking.message && <div className="booking-message"><span>Client message</span><p>{booking.message}</p></div>}
+
+                {reschedulingId === booking.id && (
+                  <div className="reschedule-panel">
+                    <div className="reschedule-heading">
+                      <div><span>Reschedule appointment</span><strong>Choose a new available date and time</strong></div>
+                      <button type="button" className="text-button" onClick={() => setReschedulingId('')}>Close</button>
+                    </div>
+                    <label>
+                      New date
+                      <input type="date" min={nzDateString()} value={rescheduleDate} onChange={(event) => void loadRescheduleSlots(event.target.value)} />
+                    </label>
+                    {loadingReschedule ? (
+                      <div className="slot-loading"><LoaderCircle className="spin" size={17} /> Checking availability…</div>
+                    ) : rescheduleDate && rescheduleSlots.length ? (
+                      <div className="slot-grid admin-slot-grid">
+                        {rescheduleSlots.map((slot) => (
+                          <button key={slot.start_at} type="button" className={rescheduleStartAt === slot.start_at ? 'slot-button selected' : 'slot-button'} onClick={() => setRescheduleStartAt(slot.start_at)}>
+                            <span>{formatNzTime(slot.start_at)}</span><small>Free</small>
+                          </button>
+                        ))}
+                      </div>
+                    ) : rescheduleDate ? <p className="slot-help">No online booking times are available on this date.</p> : null}
+                    <div className="admin-form-actions">
+                      <button className="button secondary" type="button" onClick={() => setReschedulingId('')}>Cancel</button>
+                      <button className="button primary" type="button" disabled={!rescheduleStartAt || workingId === booking.id} onClick={() => void submitReschedule(booking)}>
+                        {workingId === booking.id ? 'Saving…' : 'Save new time and email client'}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -213,42 +289,27 @@ export function AdminBookings() {
                 {booking.client_id ? (
                   <Link className="action-button" to={`/admin/clients/${booking.client_id}`}>View client</Link>
                 ) : (
-                  <button
-                    className="action-button"
-                    type="button"
-                    disabled={workingId === booking.id}
-                    onClick={() => void convertToClient(booking)}
-                  >
+                  <button className="action-button" type="button" disabled={workingId === booking.id} onClick={() => void convertToClient(booking)}>
                     <UserPlus size={17} /> Create client
                   </button>
                 )}
                 {booking.status === 'pending' && (
-                  <button
-                    className="action-button confirm"
-                    type="button"
-                    disabled={workingId === booking.id}
-                    onClick={() => void updateStatus(booking.id, 'confirmed')}
-                  >
+                  <button className="action-button confirm" type="button" disabled={workingId === booking.id} onClick={() => void manageBooking(booking, 'confirm')}>
                     <Check size={17} /> Confirm
                   </button>
                 )}
                 {['pending', 'confirmed', 'rescheduled'].includes(booking.status) && (
-                  <button
-                    className="action-button complete"
-                    type="button"
-                    disabled={workingId === booking.id}
-                    onClick={() => void updateStatus(booking.id, 'completed')}
-                  >
+                  <button className="action-button" type="button" disabled={workingId === booking.id} onClick={() => void beginReschedule(booking)}>
+                    <CalendarClock size={17} /> Reschedule
+                  </button>
+                )}
+                {['pending', 'confirmed', 'rescheduled'].includes(booking.status) && (
+                  <button className="action-button complete" type="button" disabled={workingId === booking.id} onClick={() => void manageBooking(booking, 'complete')}>
                     <Check size={17} /> Complete
                   </button>
                 )}
                 {['pending', 'confirmed', 'rescheduled'].includes(booking.status) && (
-                  <button
-                    className="action-button cancel"
-                    type="button"
-                    disabled={workingId === booking.id}
-                    onClick={() => void updateStatus(booking.id, 'cancelled')}
-                  >
+                  <button className="action-button cancel" type="button" disabled={workingId === booking.id} onClick={() => void manageBooking(booking, 'cancel')}>
                     <X size={17} /> Cancel
                   </button>
                 )}
