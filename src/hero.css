@@ -26,11 +26,13 @@
   background:
     linear-gradient(
       90deg,
-      rgba(245, 241, 232, 0.98) 0%,
-      rgba(245, 241, 232, 0.96) 31%,
-      rgba(245, 241, 232, 0.84) 45%,
-      rgba(245, 241, 232, 0.30) 61%,
-      rgba(245, 241, 232, 0.04) 78%
+      rgba(245, 241, 232, 0.99) 0%,
+      rgba(245, 241, 232, 0.98) 30%,
+      rgba(245, 241, 232, 0.94) 40%,
+      rgba(245, 241, 232, 0.78) 50%,
+      rgba(245, 241, 232, 0.46) 61%,
+      rgba(245, 241, 232, 0.18) 72%,
+      rgba(245, 241, 232, 0.03) 86%
     );
 }
 
@@ -64,7 +66,23 @@
   .hero-photo-section::before {
     background-size: auto 118%;
     background-position: calc(50% + 300px) center;
-    background-color: #d7d9cf;
+    background-color: transparent;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 26%,
+      rgba(0, 0, 0, 0.08) 33%,
+      rgba(0, 0, 0, 0.34) 40%,
+      rgba(0, 0, 0, 0.72) 48%,
+      #000 58%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent 26%,
+      rgba(0, 0, 0, 0.08) 33%,
+      rgba(0, 0, 0, 0.34) 40%,
+      rgba(0, 0, 0, 0.72) 48%,
+      #000 58%
+    );
   }
 }
 
@@ -81,7 +99,7 @@
     background:
       linear-gradient(
         90deg,
-        rgba(245, 241, 232, 0.97) 0%,
+        rgba(245, 241, 232, 0.98) 0%,
         rgba(245, 241, 232, 0.92) 42%,
         rgba(245, 241, 232, 0.53) 67%,
         rgba(245, 241, 232, 0.18) 100%
