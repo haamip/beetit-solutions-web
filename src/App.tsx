@@ -12,7 +12,7 @@ import { ServiceDetail } from './pages/ServiceDetail'
 import { Services } from './pages/Services'
 import { AdminBookings } from './pages/admin/AdminBookings'
 import { AdminCalendar } from './pages/admin/AdminCalendar'
-import { AdminClientDetail } from './pages/admin/AdminClientDetail'
+import { AdminClientRecord } from './pages/admin/AdminClientRecord'
 import { AdminClients } from './pages/admin/AdminClients'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AdminEnquiries } from './pages/admin/AdminEnquiries'
@@ -91,7 +91,7 @@ function App() {
           <Route path="calendar" element={<AdminCalendar />} />
           <Route path="enquiries" element={<AdminEnquiries />} />
           <Route path="clients" element={<AdminClients />} />
-          <Route path="clients/:clientId" element={<AdminClientDetail />} />
+          <Route path="clients/:clientId" element={<AdminClientRecord />} />
           <Route path="help" element={<AdminHelp />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
