@@ -2,6 +2,7 @@ import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { siteConfig } from '../config/site'
+import { useSiteSettings } from '../lib/siteSettings'
 
 const navItems = [
   { to: '/', label: 'Home' },
@@ -12,6 +13,7 @@ const navItems = [
 
 export function SiteLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const settings = useSiteSettings()
 
   return (
     <div className="site-shell">
@@ -50,19 +52,17 @@ export function SiteLayout() {
         </div>
       </header>
 
-      <main>
-        <Outlet />
-      </main>
+      <main><Outlet /></main>
 
       <footer className="site-footer">
         <div className="container footer-grid">
           <div>
             <strong>{siteConfig.businessName}</strong>
-            <p>{siteConfig.location}</p>
+            <p>{settings.publicLocation}</p>
           </div>
           <div>
-            <a href={`tel:${siteConfig.phone.replace(/\s/g, '')}`}>{siteConfig.phone}</a>
-            <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
+            <a href={`tel:${settings.publicPhone.replace(/\s/g, '')}`}>{settings.publicPhone}</a>
+            <a href={`mailto:${settings.publicEmail}`}>{settings.publicEmail}</a>
           </div>
           <div className="footer-links">
             <Link to="/privacy">Privacy Policy</Link>
