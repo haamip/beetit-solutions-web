@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, Clock3, LoaderCircle, Plus, Trash2 } from 'lucide-react'
 import {
+  addDays,
   addMonths,
   eachDayOfInterval,
   endOfMonth,
@@ -30,6 +31,17 @@ type BlockedTime = {
   start_at: string
   end_at: string
   reason: string | null
+}
+
+function blockOverlapsNzDate(block: BlockedTime, dateString: string) {
+  const selectedDay = new Date(`${dateString}T12:00:00`)
+  const nextDateString = format(addDays(selectedDay, 1), 'yyyy-MM-dd')
+  const dayStart = new Date(nzLocalToIso(dateString, '00:00'))
+  const dayEnd = new Date(nzLocalToIso(nextDateString, '00:00'))
+  const blockStart = new Date(block.start_at)
+  const blockEnd = new Date(block.end_at)
+
+  return blockStart < dayEnd && blockEnd > dayStart
 }
 
 export function AdminCalendar() {
@@ -90,12 +102,7 @@ export function AdminCalendar() {
   }, [loadCalendar])
 
   const selectedBookings = bookings.filter((booking) => nzDateString(new Date(booking.start_at)) === selectedDate)
-  const selectedBlocks = blockedTimes.filter((block) => {
-    const selected = new Date(`${selectedDate}T12:00:00`)
-    const blockStart = new Date(block.start_at)
-    const blockEnd = new Date(block.end_at)
-    return selected >= new Date(blockStart.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' })) && selected <= new Date(blockEnd.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }))
-  })
+  const selectedBlocks = blockedTimes.filter((block) => blockOverlapsNzDate(block, selectedDate))
 
   async function handleBlockTime(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -198,10 +205,7 @@ export function AdminCalendar() {
               {range.days.map((day) => {
                 const dateString = format(day, 'yyyy-MM-dd')
                 const dayBookings = bookings.filter((booking) => nzDateString(new Date(booking.start_at)) === dateString)
-                const hasBlock = blockedTimes.some((block) => {
-                  const blockDate = nzDateString(new Date(block.start_at))
-                  return blockDate === dateString
-                })
+                const hasBlock = blockedTimes.some((block) => blockOverlapsNzDate(block, dateString))
                 const selected = selectedDate === dateString
 
                 return (
