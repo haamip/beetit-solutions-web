@@ -1,7 +1,9 @@
 import { Archive, Check, Inbox, Mail, Phone, UserPlus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { siteConfig } from '../../config/site'
 import { formatNzDateTime } from '../../lib/beetitApi'
+import { createClientIssue, findMatchingClients, formatIssueNumber, getOpenIssueForService } from '../../lib/clientIssues'
 import { supabase } from '../../lib/supabase'
 
 type InquiryStatus = 'unread' | 'read' | 'converted' | 'archived'
@@ -14,6 +16,7 @@ type Inquiry = {
   message: string
   status: InquiryStatus
   client_id: string | null
+  issue_id: string | null
   created_at: string
 }
 
@@ -31,6 +34,7 @@ export function AdminEnquiries() {
   const [filter, setFilter] = useState<'active' | InquiryStatus | 'all'>('active')
   const [loading, setLoading] = useState(true)
   const [workingId, setWorkingId] = useState('')
+  const [workflowByInquiry, setWorkflowByInquiry] = useState<Record<string, string>>({})
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
 
@@ -40,7 +44,7 @@ export function AdminEnquiries() {
     setError('')
     const { data, error: queryError } = await supabase
       .from('contact_inquiries')
-      .select('id, name, email, phone, message, status, client_id, created_at')
+      .select('id, name, email, phone, message, status, client_id, issue_id, created_at')
       .order('created_at', { ascending: false })
     if (queryError) setError('Enquiries could not be loaded.')
     else setInquiries((data ?? []) as Inquiry[])
@@ -78,15 +82,19 @@ export function AdminEnquiries() {
     setNotice('')
 
     try {
-      const { data: existing, error: existingError } = await supabase
-        .from('clients')
-        .select('id')
-        .ilike('email', inquiry.email)
-        .limit(1)
-        .maybeSingle()
-      if (existingError) throw existingError
+      const workflow = workflowByInquiry[inquiry.id]?.trim() || null
+      const matches = await findMatchingClients(inquiry.email, inquiry.phone)
+      if (matches.length > 1) {
+        setError('More than one existing client matches this enquiry. Open Clients and check the person before converting it.')
+        setWorkingId('')
+        return
+      }
 
-      let clientId = existing?.id as string | undefined
+      let clientId = matches[0]?.id
+      const existingName = matches[0]?.full_name
+      let issueId: string
+      let matterLabel: string
+
       if (!clientId) {
         const { data: created, error: createError } = await supabase
           .from('clients')
@@ -94,26 +102,62 @@ export function AdminEnquiries() {
             full_name: inquiry.name,
             email: inquiry.email.toLowerCase(),
             phone: inquiry.phone,
+            service_type: workflow,
             status: 'active',
           })
           .select('id')
           .single()
         if (createError) throw createError
         clientId = created.id as string
+
+        const issue = await createClientIssue({
+          clientId,
+          serviceType: workflow,
+          title: workflow || 'General enquiry',
+          summary: inquiry.message,
+        })
+        issueId = issue.id
+        matterLabel = formatIssueNumber(issue.issue_number)
+      } else {
+        const openIssue = workflow ? await getOpenIssueForService(clientId, workflow) : null
+        if (openIssue) {
+          const useExisting = window.confirm(
+            `${existingName} already has open matter ${formatIssueNumber(openIssue.issue_number)} for ${workflow}.\n\nOK = file this enquiry under that matter.\nCancel = create a new matter for the same client.`,
+          )
+          if (useExisting) {
+            issueId = openIssue.id
+            matterLabel = formatIssueNumber(openIssue.issue_number)
+          } else {
+            const issue = await createClientIssue({ clientId, serviceType: workflow, title: workflow, summary: inquiry.message })
+            issueId = issue.id
+            matterLabel = formatIssueNumber(issue.issue_number)
+          }
+        } else {
+          const issue = await createClientIssue({
+            clientId,
+            serviceType: workflow,
+            title: workflow || 'General enquiry',
+            summary: inquiry.message,
+          })
+          issueId = issue.id
+          matterLabel = formatIssueNumber(issue.issue_number)
+        }
       }
 
       const { error: updateError } = await supabase
         .from('contact_inquiries')
-        .update({ status: 'converted', client_id: clientId })
+        .update({ status: 'converted', client_id: clientId, issue_id: issueId })
         .eq('id', inquiry.id)
       if (updateError) throw updateError
 
       setInquiries((current) => current.map((item) => item.id === inquiry.id
-        ? { ...item, status: 'converted', client_id: clientId ?? null }
+        ? { ...item, status: 'converted', client_id: clientId ?? null, issue_id: issueId }
         : item))
-      setNotice(existing ? 'Enquiry linked to the existing client record.' : 'Client created from the enquiry.')
+      setNotice(matches.length
+        ? `Enquiry filed under ${existingName} · ${matterLabel}. No duplicate client was created.`
+        : `Client created and enquiry filed under ${matterLabel}.`)
     } catch {
-      setError('The enquiry could not be converted to a client record.')
+      setError('The enquiry could not be converted to a client matter.')
     } finally {
       setWorkingId('')
     }
@@ -125,7 +169,7 @@ export function AdminEnquiries() {
         <div>
           <p className="eyebrow">Contact inbox</p>
           <h1>Enquiries</h1>
-          <p>Review website messages, keep track of what has been handled and create client records when an enquiry becomes work.</p>
+          <p>Review website messages, choose the likely workflow and file work under the correct existing or new client matter.</p>
         </div>
         <button className="button secondary" type="button" onClick={loadInquiries}>Refresh</button>
       </div>
@@ -161,12 +205,22 @@ export function AdminEnquiries() {
 
               <div className="enquiry-message"><p>{inquiry.message}</p></div>
 
+              {!inquiry.client_id && (
+                <label className="enquiry-workflow-field">
+                  File under workflow <span className="optional">Optional</span>
+                  <select value={workflowByInquiry[inquiry.id] ?? ''} onChange={(event) => setWorkflowByInquiry((current) => ({ ...current, [inquiry.id]: event.target.value }))}>
+                    <option value="">General enquiry</option>
+                    {siteConfig.services.filter((service) => service !== 'Other / Not sure').map((service) => <option key={service}>{service}</option>)}
+                  </select>
+                </label>
+              )}
+
               <div className="admin-form-actions enquiry-actions">
                 {inquiry.client_id ? (
-                  <Link className="action-button" to={`/admin/clients/${inquiry.client_id}`}>View client</Link>
+                  <Link className="action-button" to={`/admin/clients/${inquiry.client_id}`}>View client matter</Link>
                 ) : (
                   <button className="action-button" type="button" disabled={workingId === inquiry.id} onClick={() => void convertToClient(inquiry)}>
-                    <UserPlus size={16} /> Create client
+                    <UserPlus size={16} /> Link client and matter
                   </button>
                 )}
                 {inquiry.status === 'unread' && (
