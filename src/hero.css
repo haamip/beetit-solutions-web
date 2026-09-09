@@ -1,96 +1,134 @@
-.hero-grid {
-  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
-  align-items: center;
-}
-
-.hero-portrait {
+.hero-photo-section {
   position: relative;
-  min-height: 520px;
+  min-height: 560px;
+  display: flex;
+  align-items: stretch;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 28px;
-  background: var(--paper);
-  box-shadow: 0 24px 70px rgba(57, 56, 46, 0.12);
+  padding: 0;
+  background: #e8e4d9;
 }
 
-.hero-portrait::after {
+.hero-photo-section::before {
   content: "";
   position: absolute;
-  inset: auto 0 0;
-  height: 48%;
-  background: linear-gradient(to top, rgba(25, 31, 24, 0.84), transparent);
-  pointer-events: none;
+  inset: 0;
+  background-image: url('/donna-hero-mockup4.jpg');
+  background-repeat: no-repeat;
+  background-position: 72% center;
+  background-size: cover;
+  transform: scale(1.01);
 }
 
-.hero-portrait img {
-  width: 100%;
-  height: 100%;
-  min-height: 520px;
-  display: block;
-  object-fit: cover;
-  object-position: center;
-}
-
-.hero-portrait-caption {
+.hero-photo-section::after {
+  content: "";
   position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(245, 241, 232, 0.98) 0%,
+      rgba(245, 241, 232, 0.96) 31%,
+      rgba(245, 241, 232, 0.84) 45%,
+      rgba(245, 241, 232, 0.30) 61%,
+      rgba(245, 241, 232, 0.04) 78%
+    );
+}
+
+.hero-wide {
+  position: relative;
   z-index: 1;
-  left: 22px;
-  right: 22px;
-  bottom: 22px;
+  min-height: 560px;
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  color: white;
+  align-items: center;
+  padding-top: clamp(68px, 8vw, 104px);
+  padding-bottom: clamp(68px, 8vw, 104px);
 }
 
-.hero-portrait-caption svg {
-  flex: 0 0 auto;
-  margin-top: 2px;
+.hero-wide .hero-copy {
+  width: min(620px, 54%);
 }
 
-.hero-portrait-caption strong,
-.hero-portrait-caption span {
-  display: block;
+.hero-wide h1 {
+  max-width: 10.5ch;
 }
 
-.hero-portrait-caption strong {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.25rem;
-  font-weight: 500;
-  line-height: 1.2;
+.hero-wide .hero-lead {
+  max-width: 590px;
 }
 
-.hero-portrait-caption span {
-  margin-top: 3px;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 0.82rem;
-  line-height: 1.4;
+@media (min-width: 1180px) {
+  .hero-photo-section::before {
+    background-size: auto 118%;
+    background-position: calc(50% + 300px) center;
+    background-color: #d7d9cf;
+  }
 }
 
 @media (max-width: 850px) {
-  .hero-grid {
-    grid-template-columns: 1fr;
+  .hero-photo-section {
+    min-height: 650px;
   }
 
-  .hero-portrait,
-  .hero-portrait img {
-    min-height: 420px;
+  .hero-photo-section::before {
+    background-position: 63% center;
+  }
+
+  .hero-photo-section::after {
+    background:
+      linear-gradient(
+        90deg,
+        rgba(245, 241, 232, 0.97) 0%,
+        rgba(245, 241, 232, 0.92) 42%,
+        rgba(245, 241, 232, 0.53) 67%,
+        rgba(245, 241, 232, 0.18) 100%
+      );
+  }
+
+  .hero-wide {
+    min-height: 650px;
+  }
+
+  .hero-wide .hero-copy {
+    width: min(600px, 68%);
   }
 }
 
 @media (max-width: 580px) {
-  .hero-portrait,
-  .hero-portrait img {
-    min-height: 360px;
+  .hero-photo-section {
+    min-height: 690px;
+    align-items: flex-end;
   }
 
-  .hero-portrait {
-    border-radius: 22px;
+  .hero-photo-section::before {
+    background-size: auto 58%;
+    background-position: center top;
+    background-color: #e2e0d7;
   }
 
-  .hero-portrait-caption {
-    left: 18px;
-    right: 18px;
-    bottom: 18px;
+  .hero-photo-section::after {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(245, 241, 232, 0.02) 0%,
+        rgba(245, 241, 232, 0.10) 33%,
+        rgba(245, 241, 232, 0.94) 52%,
+        rgba(245, 241, 232, 1) 66%,
+        rgba(245, 241, 232, 1) 100%
+      );
+  }
+
+  .hero-wide {
+    min-height: 690px;
+    align-items: flex-end;
+    padding-top: 290px;
+    padding-bottom: 58px;
+  }
+
+  .hero-wide .hero-copy {
+    width: 100%;
+  }
+
+  .hero-wide h1 {
+    max-width: 11ch;
   }
 }
