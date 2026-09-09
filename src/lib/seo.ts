@@ -24,7 +24,7 @@ const upsertMeta = (selector: string, attribute: string, value: string) => {
 export function useSeo({ title, description, path = '/', noIndex = false }: SeoOptions) {
   useEffect(() => {
     const fullTitle = `${title} | ${siteConfig.brand}`
-    const canonicalUrl = new URL(path, siteConfig.baseUrl).toString()
+    const canonicalUrl = new URL(path, window.location.origin).toString()
 
     document.title = fullTitle
     upsertMeta('meta[name="description"]', 'content', description)
