@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { siteConfig } from '../config/site'
@@ -72,7 +73,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    void loadSettings()
+    queueMicrotask(() => void loadSettings())
     const refresh = () => void loadSettings()
     window.addEventListener('beetit-site-settings-updated', refresh)
     return () => window.removeEventListener('beetit-site-settings-updated', refresh)
