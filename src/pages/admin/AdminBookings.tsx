@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { formatNzDateTime, formatNzTime, getAvailableSlots, nzDateString } from '../../lib/beetitApi'
 import type { AvailableSlot } from '../../lib/beetitApi'
+import { createClientIssue, findMatchingClients, formatIssueNumber, getOpenIssueForService } from '../../lib/clientIssues'
 import { supabase } from '../../lib/supabase'
 
 type BookingStatus = 'pending' | 'confirmed' | 'rescheduled' | 'cancelled' | 'completed'
@@ -10,6 +11,7 @@ type BookingStatus = 'pending' | 'confirmed' | 'rescheduled' | 'cancelled' | 'co
 type Booking = {
   id: string
   client_id: string | null
+  issue_id: string | null
   full_name: string
   email: string
   phone: string
@@ -54,18 +56,16 @@ export function AdminBookings() {
 
   const loadBookings = useCallback(async () => {
     if (!supabase) return
-
     setLoading(true)
     setError('')
 
     const { data, error: queryError } = await supabase
       .from('bookings')
-      .select('id, client_id, full_name, email, phone, service, consultation_type, start_at, end_at, important_date, message, status, created_at')
+      .select('id, client_id, issue_id, full_name, email, phone, service, consultation_type, start_at, end_at, important_date, message, status, created_at')
       .order('start_at', { ascending: true })
 
     if (queryError) setError('Bookings could not be loaded.')
     else setBookings((data ?? []) as Booking[])
-
     setLoading(false)
   }, [])
 
@@ -157,22 +157,22 @@ export function AdminBookings() {
 
   async function convertToClient(booking: Booking) {
     if (!supabase || booking.client_id) return
-
     setWorkingId(booking.id)
     setError('')
     setNotice('')
 
     try {
-      const { data: existingClient, error: existingError } = await supabase
-        .from('clients')
-        .select('id')
-        .ilike('email', booking.email)
-        .limit(1)
-        .maybeSingle()
+      const matches = await findMatchingClients(booking.email, booking.phone)
+      if (matches.length > 1) {
+        setError('More than one existing client matches this booking. Open Clients and check the person before linking this booking.')
+        setWorkingId('')
+        return
+      }
 
-      if (existingError) throw existingError
-
-      let clientId = existingClient?.id as string | undefined
+      let clientId = matches[0]?.id
+      let existingName = matches[0]?.full_name
+      let issueId: string | null = null
+      let matterLabel = ''
 
       if (!clientId) {
         const { data: createdClient, error: createError } = await supabase
@@ -187,18 +187,60 @@ export function AdminBookings() {
           })
           .select('id')
           .single()
-
         if (createError) throw createError
         clientId = createdClient.id as string
+
+        const issue = await createClientIssue({
+          clientId,
+          serviceType: booking.service,
+          title: booking.service,
+          summary: booking.message || 'Created from an online booking.',
+        })
+        issueId = issue.id
+        matterLabel = formatIssueNumber(issue.issue_number)
+      } else {
+        const openIssue = await getOpenIssueForService(clientId, booking.service)
+        if (openIssue) {
+          const useExisting = window.confirm(
+            `${existingName} already has open matter ${formatIssueNumber(openIssue.issue_number)} for ${booking.service}.\n\nOK = link this booking to that matter.\nCancel = create a new matter for the same client.`,
+          )
+          if (useExisting) {
+            issueId = openIssue.id
+            matterLabel = formatIssueNumber(openIssue.issue_number)
+          } else {
+            const issue = await createClientIssue({
+              clientId,
+              serviceType: booking.service,
+              title: booking.service,
+              summary: booking.message || 'New matter created from an online booking.',
+            })
+            issueId = issue.id
+            matterLabel = formatIssueNumber(issue.issue_number)
+          }
+        } else {
+          const issue = await createClientIssue({
+            clientId,
+            serviceType: booking.service,
+            title: booking.service,
+            summary: booking.message || 'New matter created from an online booking.',
+          })
+          issueId = issue.id
+          matterLabel = formatIssueNumber(issue.issue_number)
+        }
       }
 
-      const { error: linkError } = await supabase.from('bookings').update({ client_id: clientId }).eq('id', booking.id)
+      const { error: linkError } = await supabase
+        .from('bookings')
+        .update({ client_id: clientId, issue_id: issueId })
+        .eq('id', booking.id)
       if (linkError) throw linkError
 
-      setBookings((current) => current.map((item) => item.id === booking.id ? { ...item, client_id: clientId ?? null } : item))
-      setNotice(existingClient ? 'Booking linked to the existing client record.' : 'Client created and booking linked.')
+      setBookings((current) => current.map((item) => item.id === booking.id ? { ...item, client_id: clientId ?? null, issue_id: issueId } : item))
+      setNotice(matches.length
+        ? `Booking linked to ${existingName} and ${matterLabel}. No duplicate client was created.`
+        : `Client created and booking filed under ${matterLabel}.`)
     } catch {
-      setError('The booking could not be converted to a client record.')
+      setError('The booking could not be linked to a client matter.')
     } finally {
       setWorkingId('')
     }
@@ -210,7 +252,7 @@ export function AdminBookings() {
         <div>
           <p className="eyebrow">Booking management</p>
           <h1>Bookings</h1>
-          <p>Review requests, confirm appointments, reschedule when needed and keep the client informed automatically.</p>
+          <p>Review requests, confirm appointments, reschedule when needed and file new work under the correct client matter.</p>
         </div>
         <button className="button secondary" type="button" onClick={loadBookings}>Refresh</button>
       </div>
@@ -287,10 +329,10 @@ export function AdminBookings() {
 
               <div className="admin-booking-actions">
                 {booking.client_id ? (
-                  <Link className="action-button" to={`/admin/clients/${booking.client_id}`}>View client</Link>
+                  <Link className="action-button" to={`/admin/clients/${booking.client_id}`}>View client matter</Link>
                 ) : (
                   <button className="action-button" type="button" disabled={workingId === booking.id} onClick={() => void convertToClient(booking)}>
-                    <UserPlus size={17} /> Create client
+                    <UserPlus size={17} /> Link client and matter
                   </button>
                 )}
                 {booking.status === 'pending' && (
