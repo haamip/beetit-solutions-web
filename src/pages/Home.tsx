@@ -14,6 +14,7 @@ import { serviceDetails } from '../config/services'
 import { useSeo } from '../lib/seo'
 import { useSiteSettings } from '../lib/siteSettings'
 import '../hero.css'
+import '../home-polish.css'
 import '../services-home.css'
 
 const homeServices = [
@@ -37,15 +38,20 @@ export function Home() {
   const heroStyle = {
     '--hero-fade-strength': settings.heroOverlayStrength,
     '--hero-background': settings.backgroundColor,
+    '--hero-min-height': `${settings.heroHeight}px`,
   } as CSSProperties
 
   return (
     <>
-      <section className="hero-section hero-photo-section" style={heroStyle}>
+      <section className="hero-section hero-photo-section home-hero" style={heroStyle}>
         <div
           className="hero-photo-media"
           aria-hidden="true"
-          style={{ backgroundImage: `url(${settings.heroImageUrl})`, backgroundPosition: settings.heroPosition }}
+          style={{
+            backgroundImage: `url(${settings.heroImageUrl})`,
+            backgroundPosition: settings.heroPosition,
+            backgroundSize: `${Math.round(settings.heroImageScale * 100)}% auto`,
+          }}
         />
         <div className="hero-photo-gradient" aria-hidden="true" />
         <div className="container hero-wide">
@@ -63,7 +69,7 @@ export function Home() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section home-about">
         <div className="container split-section">
           <div>
             <p className="eyebrow">About Donna</p>
@@ -76,7 +82,7 @@ export function Home() {
         </div>
       </section>
 
-      <section className="section section-soft services-showcase">
+      <section className="section section-soft services-showcase home-services">
         <div className="container">
           <div className="section-heading services-showcase-heading">
             <div>
@@ -117,7 +123,7 @@ export function Home() {
         </div>
       </section>
 
-      <section className="section cta-section">
+      <section className="section cta-section home-cta">
         <div className="container cta-card">
           <div>
             <p className="eyebrow">Ready to talk?</p>
