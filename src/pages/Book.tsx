@@ -19,7 +19,7 @@ import {
 import type { AvailableSlot } from '../lib/beetitApi'
 import { useSeo } from '../lib/seo'
 
-type DayStatus = 'free' | 'limited' | 'full' | 'closed' | 'loading'
+type DayStatus = 'free' | 'limited' | 'full' | 'closed' | 'loading' | 'unavailable'
 
 function addDays(dateString: string, amount: number) {
   const [year, month, day] = dateString.split('-').map(Number)
@@ -47,8 +47,9 @@ function formatCalendarDay(dateString: string) {
   }
 }
 
-function getDayStatus(dateString: string, slots: AvailableSlot[] | undefined): DayStatus {
+function getDayStatus(dateString: string, slots: AvailableSlot[] | undefined, failed = false): DayStatus {
   if (!isOnlineBookingDay(dateString)) return 'closed'
+  if (failed) return 'unavailable'
   if (slots === undefined) return 'loading'
   if (slots.length === 0) return 'full'
   if (slots.length <= 3) return 'limited'
@@ -61,6 +62,7 @@ const statusLabel: Record<DayStatus, string> = {
   full: 'Full',
   closed: 'Closed',
   loading: 'Checking',
+  unavailable: 'Retry',
 }
 
 export function Book() {
@@ -72,6 +74,7 @@ export function Book() {
   const today = nzDateString()
   const [windowStart, setWindowStart] = useState(today)
   const [availability, setAvailability] = useState<Record<string, AvailableSlot[]>>({})
+  const [availabilityErrors, setAvailabilityErrors] = useState<Record<string, boolean>>({})
   const [date, setDate] = useState('')
   const [slots, setSlots] = useState<AvailableSlot[]>([])
   const [selectedStartAt, setSelectedStartAt] = useState('')
@@ -106,13 +109,24 @@ export function Book() {
       Promise.all(
         openDates.map(async (calendarDate) => {
           try {
-            return [calendarDate, await getAvailableSlots(calendarDate)] as const
+            return { calendarDate, slots: await getAvailableSlots(calendarDate), failed: false }
           } catch {
-            return [calendarDate, []] as const
+            return { calendarDate, slots: undefined, failed: true }
           }
         }),
       ).then((entries) => {
-        if (!cancelled) setAvailability((current) => ({ ...current, ...Object.fromEntries(entries) }))
+        if (cancelled) return
+
+        const nextAvailability: Record<string, AvailableSlot[]> = {}
+        const nextErrors: Record<string, boolean> = {}
+
+        entries.forEach((entry) => {
+          nextErrors[entry.calendarDate] = entry.failed
+          if (entry.slots !== undefined) nextAvailability[entry.calendarDate] = entry.slots
+        })
+
+        setAvailability((current) => ({ ...current, ...nextAvailability }))
+        setAvailabilityErrors((current) => ({ ...current, ...nextErrors }))
       })
     })
 
@@ -130,18 +144,21 @@ export function Book() {
     if (!nextDate) return
 
     const cached = availability[nextDate]
-    if (cached !== undefined) {
+    if (cached !== undefined && !availabilityErrors[nextDate]) {
       setSlots(cached)
       return
     }
 
     try {
       setLoadingSlots(true)
+      setAvailabilityErrors((current) => ({ ...current, [nextDate]: false }))
       const nextSlots = await getAvailableSlots(nextDate)
       setSlots(nextSlots)
       setAvailability((current) => ({ ...current, [nextDate]: nextSlots }))
+      setAvailabilityErrors((current) => ({ ...current, [nextDate]: false }))
     } catch {
-      setError('We could not load the available times. Please try again.')
+      setAvailabilityErrors((current) => ({ ...current, [nextDate]: true }))
+      setError('We could not load the available times. Please try that day again.')
     } finally {
       setLoadingSlots(false)
     }
@@ -195,6 +212,11 @@ export function Book() {
         delete copy[date]
         return copy
       })
+      setAvailabilityErrors((current) => {
+        const copy = { ...current }
+        delete copy[date]
+        return copy
+      })
     } catch (bookingError) {
       const message = bookingError instanceof Error ? bookingError.message : 'We could not submit your booking.'
       setError(message.includes('taken') || message.includes('available') ? message : 'We could not submit your booking. Please check the details and try again.')
@@ -204,8 +226,11 @@ export function Book() {
           .then((nextSlots) => {
             setSlots(nextSlots)
             setAvailability((current) => ({ ...current, [date]: nextSlots }))
+            setAvailabilityErrors((current) => ({ ...current, [date]: false }))
           })
-          .catch(() => undefined)
+          .catch(() => {
+            setAvailabilityErrors((current) => ({ ...current, [date]: true }))
+          })
       }
     } finally {
       setSubmitting(false)
@@ -308,7 +333,7 @@ export function Book() {
               {calendarDates.map((calendarDate) => {
                 const display = formatCalendarDay(calendarDate)
                 const daySlots = availability[calendarDate]
-                const status = getDayStatus(calendarDate, daySlots)
+                const status = getDayStatus(calendarDate, daySlots, availabilityErrors[calendarDate] === true)
                 const disabled = status === 'closed' || status === 'full' || status === 'loading'
                 const selected = date === calendarDate
 
@@ -331,9 +356,9 @@ export function Book() {
 
           <fieldset className="slot-fieldset">
             <legend>{date ? `Available times for ${formatCalendarDay(date).weekday} ${formatCalendarDay(date).day} ${formatCalendarDay(date).month}` : 'Available times'}</legend>
-            {!date && <p className="slot-help">Choose a day marked Free or Limited above.</p>}
+            {!date && <p className="slot-help">Choose a day marked Free or Limited above. If a day says Retry, tap it to check availability again.</p>}
             {loadingSlots && <div className="slot-loading"><LoaderCircle className="spin" size={18} /> Loading available times</div>}
-            {date && !loadingSlots && slots.length === 0 && <p className="slot-help">That day is now fully booked. Choose another available day.</p>}
+            {date && !loadingSlots && slots.length === 0 && !availabilityErrors[date] && <p className="slot-help">That day is now fully booked. Choose another available day.</p>}
             {slots.length > 0 && (
               <div className="slot-grid">
                 {slots.map((slot) => (
