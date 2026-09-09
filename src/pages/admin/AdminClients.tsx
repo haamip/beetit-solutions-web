@@ -184,7 +184,14 @@ export function AdminClients() {
                     {client.phone && <a href={`tel:${client.phone.replace(/\s/g, '')}`}><Phone size={15} /> {client.phone}</a>}
                   </td>
                   <td>{client.service_type || 'Not set'}</td>
-                  <td><span className={`status-pill ${client.status}`}>{client.status}</span></td>
+                  <td>
+                    <span
+                      className={`status-pill ${client.status}`}
+                      style={{ display: 'inline-flex', width: 'fit-content', marginTop: 0 }}
+                    >
+                      {client.status}
+                    </span>
+                  </td>
                   <td><Link className="text-link" to={`/admin/clients/${client.id}`}>Open</Link></td>
                 </tr>
               ))}
