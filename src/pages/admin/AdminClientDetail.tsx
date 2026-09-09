@@ -1,9 +1,10 @@
-import { ArrowLeft, Download, FileText, LoaderCircle, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Copy, Download, FileText, LoaderCircle, Plus, ShieldCheck, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { formatNzDateTime } from '../../lib/beetitApi'
 import { supabase } from '../../lib/supabase'
+import '../../identity.css'
 
 type Client = {
   id: string
@@ -12,6 +13,9 @@ type Client = {
   phone: string | null
   service_type: string | null
   important_date: string | null
+  date_of_birth: string | null
+  dob_confirmed_at: string | null
+  dob_confirmed_by: string | null
   status: string
   created_at: string
 }
@@ -28,6 +32,7 @@ type ClientDocument = {
   original_name: string
   mime_type: string | null
   size_bytes: number | null
+  document_type: 'general' | 'identity'
   created_at: string
 }
 
@@ -39,6 +44,14 @@ type ClientBooking = {
   status: string
 }
 
+async function sha256Hex(value: string) {
+  const bytes = new TextEncoder().encode(value)
+  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('')
+}
+
 export function AdminClientDetail() {
   const { clientId } = useParams()
   const [client, setClient] = useState<Client | null>(null)
@@ -47,6 +60,8 @@ export function AdminClientDetail() {
   const [bookings, setBookings] = useState<ClientBooking[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [linkWorking, setLinkWorking] = useState(false)
+  const [uploadLink, setUploadLink] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
 
@@ -59,7 +74,7 @@ export function AdminClientDetail() {
     const [clientResult, notesResult, documentsResult, bookingsResult] = await Promise.all([
       supabase
         .from('clients')
-        .select('id, full_name, email, phone, service_type, important_date, status, created_at')
+        .select('id, full_name, email, phone, service_type, important_date, date_of_birth, dob_confirmed_at, dob_confirmed_by, status, created_at')
         .eq('id', clientId)
         .maybeSingle(),
       supabase
@@ -69,7 +84,7 @@ export function AdminClientDetail() {
         .order('created_at', { ascending: false }),
       supabase
         .from('client_documents')
-        .select('id, storage_path, original_name, mime_type, size_bytes, created_at')
+        .select('id, storage_path, original_name, mime_type, size_bytes, document_type, created_at')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false }),
       supabase
@@ -157,6 +172,136 @@ export function AdminClientDetail() {
     setSaving(false)
   }
 
+  async function saveDateOfBirth(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!supabase || !clientId || !client) return
+
+    const form = event.currentTarget
+    const data = new FormData(form)
+    const dateOfBirth = String(data.get('dateOfBirth') ?? '') || null
+    const changed = dateOfBirth !== client.date_of_birth
+
+    setSaving(true)
+    setError('')
+    setNotice('')
+
+    const update = changed
+      ? { date_of_birth: dateOfBirth, dob_confirmed_at: null, dob_confirmed_by: null }
+      : { date_of_birth: dateOfBirth }
+
+    const { data: updated, error: updateError } = await supabase
+      .from('clients')
+      .update(update)
+      .eq('id', clientId)
+      .select('id, full_name, email, phone, service_type, important_date, date_of_birth, dob_confirmed_at, dob_confirmed_by, status, created_at')
+      .single()
+
+    if (updateError || !updated) {
+      setError('The date of birth could not be saved.')
+    } else {
+      setClient(updated as Client)
+      setNotice(changed ? 'Date of birth saved. Confirm it after checking the uploaded ID.' : 'Date of birth saved.')
+    }
+
+    setSaving(false)
+  }
+
+  async function confirmDateOfBirth() {
+    if (!supabase || !clientId || !client?.date_of_birth) return
+
+    const identityDocuments = documents.filter((document) => document.document_type === 'identity')
+    if (!identityDocuments.length) {
+      setError('An ID document must be uploaded before the date of birth can be confirmed.')
+      return
+    }
+
+    if (!window.confirm(`Confirm ${client.date_of_birth} as ${client.full_name}'s date of birth after checking the uploaded ID?`)) return
+
+    setSaving(true)
+    setError('')
+    setNotice('')
+
+    const { data: sessionData } = await supabase.auth.getSession()
+    const { data: updated, error: updateError } = await supabase
+      .from('clients')
+      .update({
+        dob_confirmed_at: new Date().toISOString(),
+        dob_confirmed_by: sessionData.session?.user.id ?? null,
+      })
+      .eq('id', clientId)
+      .select('id, full_name, email, phone, service_type, important_date, date_of_birth, dob_confirmed_at, dob_confirmed_by, status, created_at')
+      .single()
+
+    if (updateError || !updated) {
+      setError('The date of birth could not be confirmed.')
+    } else {
+      setClient(updated as Client)
+      setNotice('Date of birth confirmed from the uploaded ID.')
+    }
+
+    setSaving(false)
+  }
+
+  async function removeDobConfirmation() {
+    if (!supabase || !clientId || !client?.dob_confirmed_at) return
+    if (!window.confirm('Remove the confirmed status from this date of birth? The DOB itself will remain on the client record.')) return
+
+    const { data: updated, error: updateError } = await supabase
+      .from('clients')
+      .update({ dob_confirmed_at: null, dob_confirmed_by: null })
+      .eq('id', clientId)
+      .select('id, full_name, email, phone, service_type, important_date, date_of_birth, dob_confirmed_at, dob_confirmed_by, status, created_at')
+      .single()
+
+    if (updateError || !updated) setError('The DOB confirmation could not be removed.')
+    else {
+      setClient(updated as Client)
+      setNotice('DOB confirmation removed.')
+    }
+  }
+
+  async function createIdUploadLink() {
+    if (!supabase || !clientId || linkWorking) return
+
+    setLinkWorking(true)
+    setError('')
+    setNotice('')
+    setUploadLink('')
+
+    try {
+      const token = `${crypto.randomUUID().replaceAll('-', '')}${crypto.randomUUID().replaceAll('-', '')}`
+      const tokenHash = await sha256Hex(token)
+      const { data: sessionData } = await supabase.auth.getSession()
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+
+      const { error: insertError } = await supabase.from('client_upload_links').insert({
+        client_id: clientId,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+        created_by: sessionData.session?.user.id ?? null,
+      })
+
+      if (insertError) throw insertError
+
+      setUploadLink(`${window.location.origin}/client-id/${token}`)
+      setNotice('Secure one-use ID upload link created. It expires in 7 days.')
+    } catch {
+      setError('A secure ID upload link could not be created.')
+    } finally {
+      setLinkWorking(false)
+    }
+  }
+
+  async function copyIdUploadLink() {
+    if (!uploadLink) return
+    try {
+      await navigator.clipboard.writeText(uploadLink)
+      setNotice('ID upload link copied.')
+    } catch {
+      setError('The link could not be copied automatically. Select and copy it manually.')
+    }
+  }
+
   async function uploadDocument(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!supabase || !clientId) return
@@ -200,6 +345,7 @@ export function AdminClientDetail() {
       mime_type: file.type || null,
       size_bytes: file.size,
       uploaded_by: sessionData.session?.user.id ?? null,
+      document_type: 'general',
     })
 
     if (recordError) {
@@ -233,6 +379,11 @@ export function AdminClientDetail() {
   async function deleteDocument(document: ClientDocument) {
     if (!supabase) return
 
+    if (document.document_type === 'identity') {
+      const warning = window.confirm('Delete this identity document? If it is the last ID on the client record, any DOB confirmation will also be removed.')
+      if (!warning) return
+    }
+
     setError('')
     setNotice('')
 
@@ -251,8 +402,8 @@ export function AdminClientDetail() {
       return
     }
 
-    setDocuments((current) => current.filter((item) => item.id !== document.id))
     setNotice('Document removed.')
+    await loadClient()
   }
 
   async function updateStatus(status: string) {
@@ -281,6 +432,9 @@ export function AdminClientDetail() {
       </div>
     )
   }
+
+  const identityDocuments = documents.filter((document) => document.document_type === 'identity')
+  const identityReceived = identityDocuments.length > 0
 
   return (
     <>
@@ -341,6 +495,83 @@ export function AdminClientDetail() {
         </section>
       </div>
 
+      <section className="dashboard-panel identity-verification-panel">
+        <div className="dashboard-panel-heading">
+          <div>
+            <p className="eyebrow">Identity check</p>
+            <h2>ID and date of birth</h2>
+          </div>
+          <ShieldCheck size={22} />
+        </div>
+
+        <div className="identity-verification-grid">
+          <div className="identity-status-card">
+            <div className="identity-status-row">
+              <span className="identity-status-label"><ShieldCheck size={18} /> Verification status</span>
+              {client.dob_confirmed_at ? (
+                <span className="identity-status-pill verified"><CheckCircle2 size={14} /> DOB confirmed</span>
+              ) : identityReceived ? (
+                <span className="identity-status-pill received">ID received</span>
+              ) : (
+                <span className="identity-status-pill">ID required</span>
+              )}
+            </div>
+
+            <form className="identity-dob-form" onSubmit={saveDateOfBirth}>
+              <label>
+                Date of birth
+                <input name="dateOfBirth" type="date" defaultValue={client.date_of_birth ?? ''} />
+              </label>
+              <div className="identity-actions">
+                <button className="button secondary" type="submit" disabled={saving}>Save DOB</button>
+                {!client.dob_confirmed_at && client.date_of_birth && identityReceived && (
+                  <button className="button primary" type="button" onClick={() => void confirmDateOfBirth()} disabled={saving}>
+                    Confirm DOB from ID
+                  </button>
+                )}
+                {client.dob_confirmed_at && (
+                  <button className="text-button" type="button" onClick={() => void removeDobConfirmation()} disabled={saving}>
+                    Remove confirmation
+                  </button>
+                )}
+              </div>
+            </form>
+
+            {client.dob_confirmed_at ? (
+              <p className="identity-helper">Confirmed from an uploaded ID on {formatNzDateTime(client.dob_confirmed_at)}.</p>
+            ) : (
+              <p className="identity-helper">The DOB stays unconfirmed until an ID has been uploaded and an authorised admin checks it.</p>
+            )}
+
+            {identityReceived && (
+              <div className="identity-actions">
+                <button className="text-button" type="button" onClick={() => void downloadDocument(identityDocuments[0])}>
+                  View latest ID
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="identity-link-card">
+            <strong>Client ID upload</strong>
+            <p className="identity-helper">Create a private one-use link for the client. The link expires after 7 days and the ID goes straight into secure client storage.</p>
+            <div className="identity-actions">
+              <button className="button primary" type="button" onClick={() => void createIdUploadLink()} disabled={linkWorking}>
+                {linkWorking ? 'Creating…' : identityReceived ? 'Create replacement upload link' : 'Create ID upload link'}
+              </button>
+            </div>
+            {uploadLink && (
+              <div className="identity-upload-link">
+                <code>{uploadLink}</code>
+                <button className="button secondary" type="button" onClick={() => void copyIdUploadLink()}>
+                  <Copy size={16} /> Copy link
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       <div className="client-detail-grid client-detail-grid-lower">
         <section className="dashboard-panel">
           <div className="dashboard-panel-heading">
@@ -362,6 +593,7 @@ export function AdminClientDetail() {
                 <div>
                   <strong>{document.original_name}</strong>
                   <span>{formatNzDateTime(document.created_at)}</span>
+                  {document.document_type === 'identity' && <span className="identity-document-badge">Identity document</span>}
                 </div>
                 <button type="button" aria-label={`Download ${document.original_name}`} onClick={() => void downloadDocument(document)}>
                   <Download size={17} />
