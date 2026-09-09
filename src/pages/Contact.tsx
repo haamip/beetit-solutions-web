@@ -1,18 +1,19 @@
 import { CheckCircle2, Mail, MapPin, Phone } from 'lucide-react'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { siteConfig } from '../config/site'
 import { submitContact } from '../lib/beetitApi'
 import { useSeo } from '../lib/seo'
+import { useSiteSettings } from '../lib/siteSettings'
 
 export function Contact() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const settings = useSiteSettings()
 
   useSeo({
     title: 'Contact',
-    description: 'Contact Donna Pokere Phillips Legal Advocacy & Advisory Services in Tuakau, Waikato and South Auckland.',
+    description: `Contact Donna Pokere Phillips Legal Advocacy & Advisory Services in ${settings.publicLocation}.`,
     path: '/contact',
   })
 
@@ -20,7 +21,6 @@ export function Contact() {
     event.preventDefault()
     setError('')
     setSuccess('')
-
     const form = event.currentTarget
     const data = new FormData(form)
 
@@ -52,49 +52,23 @@ export function Contact() {
           <p className="page-lead">Send a short message and Donna can come back to you about the best next step.</p>
 
           <div className="contact-details">
-            <a href={`tel:${siteConfig.phone.replace(/\s/g, '')}`}>
-              <Phone size={20} />
-              <span>{siteConfig.phone}</span>
-            </a>
-            <a href={`mailto:${siteConfig.email}`}>
-              <Mail size={20} />
-              <span>{siteConfig.email}</span>
-            </a>
-            <div>
-              <MapPin size={20} />
-              <span>{siteConfig.location}</span>
-            </div>
+            <a href={`tel:${settings.publicPhone.replace(/\s/g, '')}`}><Phone size={20} /><span>{settings.publicPhone}</span></a>
+            <a href={`mailto:${settings.publicEmail}`}><Mail size={20} /><span>{settings.publicEmail}</span></a>
+            <div><MapPin size={20} /><span>{settings.publicLocation}</span></div>
           </div>
         </div>
 
         <form className="form-card" onSubmit={handleSubmit}>
           {success && (
-            <div className="form-status success" role="status">
-              <CheckCircle2 size={20} />
-              <span>{success}</span>
-            </div>
+            <div className="form-status success" role="status"><CheckCircle2 size={20} /><span>{success}</span></div>
           )}
           {error && <div className="form-status error" role="alert">{error}</div>}
 
-          <label>
-            Name
-            <input name="name" autoComplete="name" required />
-          </label>
-          <label>
-            Email
-            <input name="email" type="email" autoComplete="email" required />
-          </label>
-          <label>
-            Phone
-            <input name="phone" type="tel" autoComplete="tel" />
-          </label>
-          <label>
-            Message
-            <textarea name="message" rows={7} required />
-          </label>
-          <button className="button primary full-width" type="submit" disabled={submitting}>
-            {submitting ? 'Sending…' : 'Send message'}
-          </button>
+          <label>Name<input name="name" autoComplete="name" required /></label>
+          <label>Email<input name="email" type="email" autoComplete="email" required /></label>
+          <label>Phone<input name="phone" type="tel" autoComplete="tel" /></label>
+          <label>Message<textarea name="message" rows={7} required /></label>
+          <button className="button primary full-width" type="submit" disabled={submitting}>{submitting ? 'Sending…' : 'Send message'}</button>
         </form>
       </div>
     </section>
