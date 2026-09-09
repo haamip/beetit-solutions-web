@@ -1,9 +1,10 @@
 import { ImagePlus, Mail, Palette, RefreshCcw, Save, Settings, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
+import type { CSSProperties, FormEvent } from 'react'
 import { siteConfig } from '../../config/site'
 import { defaultSiteSettings } from '../../lib/siteSettings'
 import { supabase } from '../../lib/supabase'
+import '../../site-editor-polish.css'
 
 type Profile = {
   id: string
@@ -18,6 +19,8 @@ type SiteDraft = {
   heroImagePath: string | null
   heroPosition: string
   heroOverlayStrength: number
+  heroImageScale: number
+  heroHeight: number
   heroEyebrow: string
   heroTitle: string
   heroLead: string
@@ -33,6 +36,8 @@ const defaultDraft: SiteDraft = {
   heroImagePath: null,
   heroPosition: defaultSiteSettings.heroPosition,
   heroOverlayStrength: defaultSiteSettings.heroOverlayStrength,
+  heroImageScale: defaultSiteSettings.heroImageScale,
+  heroHeight: defaultSiteSettings.heroHeight,
   heroEyebrow: defaultSiteSettings.heroEyebrow,
   heroTitle: defaultSiteSettings.heroTitle,
   heroLead: defaultSiteSettings.heroLead,
@@ -64,7 +69,7 @@ export function AdminSettings() {
         supabase.from('admin_users').select('id, email, full_name').eq('id', userId).maybeSingle(),
         supabase
           .from('site_settings')
-          .select('primary_color, background_color, accent_color, hero_image_path, hero_position, hero_overlay_strength, hero_eyebrow, hero_title, hero_lead, public_email, public_phone, public_location')
+          .select('primary_color, background_color, accent_color, hero_image_path, hero_position, hero_overlay_strength, hero_image_scale, hero_height, hero_eyebrow, hero_title, hero_lead, public_email, public_phone, public_location')
           .eq('id', 1)
           .maybeSingle(),
       ])
@@ -80,7 +85,9 @@ export function AdminSettings() {
           accentColor: data.accent_color || defaultDraft.accentColor,
           heroImagePath: data.hero_image_path || null,
           heroPosition: data.hero_position || defaultDraft.heroPosition,
-          heroOverlayStrength: Number(data.hero_overlay_strength ?? 1),
+          heroOverlayStrength: Number(data.hero_overlay_strength ?? defaultDraft.heroOverlayStrength),
+          heroImageScale: Number(data.hero_image_scale ?? defaultDraft.heroImageScale),
+          heroHeight: Number(data.hero_height ?? defaultDraft.heroHeight),
           heroEyebrow: data.hero_eyebrow || defaultDraft.heroEyebrow,
           heroTitle: data.hero_title || defaultDraft.heroTitle,
           heroLead: data.hero_lead || defaultDraft.heroLead,
@@ -137,6 +144,8 @@ export function AdminSettings() {
       accentColor: String(data.get('accentColor') ?? site.accentColor),
       heroPosition: String(data.get('heroPosition') ?? site.heroPosition),
       heroOverlayStrength: Number(data.get('heroOverlayStrength') ?? site.heroOverlayStrength),
+      heroImageScale: Number(data.get('heroImageScale') ?? site.heroImageScale),
+      heroHeight: Number(data.get('heroHeight') ?? site.heroHeight),
       heroEyebrow: String(data.get('heroEyebrow') ?? '').trim(),
       heroTitle: String(data.get('heroTitle') ?? '').trim(),
       heroLead: String(data.get('heroLead') ?? '').trim(),
@@ -156,6 +165,8 @@ export function AdminSettings() {
         accent_color: next.accentColor,
         hero_position: next.heroPosition,
         hero_overlay_strength: next.heroOverlayStrength,
+        hero_image_scale: next.heroImageScale,
+        hero_height: next.heroHeight,
         hero_eyebrow: next.heroEyebrow,
         hero_title: next.heroTitle,
         hero_lead: next.heroLead,
@@ -226,14 +237,14 @@ export function AdminSettings() {
       setSite((current) => ({ ...current, heroImagePath: path }))
       form.reset()
       broadcastSettingsUpdate()
-      setNotice('New hero photo published. The site automatically applies the crop and gradient blend.')
+      setNotice('New hero photo published. Use Photo size, focus and fade below to tune it without editing the image.')
     }
     setUploadingHero(false)
   }
 
   async function resetWebsiteStyle() {
     if (!supabase || !profile) return
-    if (!window.confirm('Reset colours and hero wording to the Beet It design defaults? The current uploaded photo will stay in place.')) return
+    if (!window.confirm('Reset colours, hero wording and hero sizing to the Beet It design defaults? The current uploaded photo will stay in place.')) return
 
     setSaving(true)
     const next = { ...defaultDraft, heroImagePath: site.heroImagePath }
@@ -245,6 +256,8 @@ export function AdminSettings() {
         accent_color: next.accentColor,
         hero_position: next.heroPosition,
         hero_overlay_strength: next.heroOverlayStrength,
+        hero_image_scale: next.heroImageScale,
+        hero_height: next.heroHeight,
         hero_eyebrow: next.heroEyebrow,
         hero_title: next.heroTitle,
         hero_lead: next.heroLead,
@@ -264,6 +277,11 @@ export function AdminSettings() {
   }
 
   if (loading) return <div className="dashboard-loading">Loading settings…</div>
+
+  const previewStyle = {
+    backgroundColor: site.backgroundColor,
+    '--preview-height': `${Math.max(260, Math.round(site.heroHeight * .68))}px`,
+  } as CSSProperties
 
   return (
     <>
@@ -363,9 +381,9 @@ export function AdminSettings() {
             </div>
           </section>
 
-          <section className="website-editor-section">
+          <section className="website-editor-section hero-treatment-section">
             <h3>Hero photo treatment</h3>
-            <p>The photo is always cropped to fill the hero and automatically fades into the selected page background.</p>
+            <p>Upload the normal photo, then resize and reposition it here. Beet It keeps the crop and gradient treatment consistent.</p>
             <div className="settings-form">
               <label>
                 Photo focus
@@ -375,11 +393,22 @@ export function AdminSettings() {
                   <option value="72% center">Right</option>
                   <option value="82% center">Far right</option>
                   <option value="40% center">Slightly left</option>
+                  <option value="center 35%">Higher</option>
+                  <option value="center 65%">Lower</option>
                 </select>
               </label>
               <label>
+                Photo size <strong>{Math.round(site.heroImageScale * 100)}%</strong>
+                <input name="heroImageScale" type="range" min="0.75" max="1.35" step="0.05" value={site.heroImageScale} onChange={(event) => setSite((current) => ({ ...current, heroImageScale: Number(event.target.value) }))} />
+                <span className="field-help">Smaller shows more of the photo. Larger crops in closer.</span>
+              </label>
+              <label>
+                Hero height <strong>{site.heroHeight}px</strong>
+                <input name="heroHeight" type="range" min="360" max="520" step="10" value={site.heroHeight} onChange={(event) => setSite((current) => ({ ...current, heroHeight: Number(event.target.value) }))} />
+              </label>
+              <label>
                 Fade strength <strong>{site.heroOverlayStrength.toFixed(2)}</strong>
-                <input name="heroOverlayStrength" type="range" min="0.5" max="1.3" step="0.05" value={site.heroOverlayStrength} onChange={(event) => setSite((current) => ({ ...current, heroOverlayStrength: Number(event.target.value) }))} />
+                <input name="heroOverlayStrength" type="range" min="0.45" max="1" step="0.05" value={Math.min(site.heroOverlayStrength, 1)} onChange={(event) => setSite((current) => ({ ...current, heroOverlayStrength: Number(event.target.value) }))} />
               </label>
             </div>
           </section>
@@ -394,9 +423,16 @@ export function AdminSettings() {
           </section>
         </div>
 
-        <div className="settings-hero-preview" style={{ backgroundColor: site.backgroundColor }}>
-          <div className="settings-hero-preview-image" style={{ backgroundImage: `url(${heroPreviewUrl})`, backgroundPosition: site.heroPosition }} />
-          <div className="settings-hero-preview-overlay" style={{ opacity: site.heroOverlayStrength }} />
+        <div className="settings-hero-preview" style={previewStyle}>
+          <div
+            className="settings-hero-preview-image"
+            style={{
+              backgroundImage: `url(${heroPreviewUrl})`,
+              backgroundPosition: site.heroPosition,
+              backgroundSize: `${Math.round(site.heroImageScale * 100)}% auto`,
+            }}
+          />
+          <div className="settings-hero-preview-overlay" style={{ opacity: Math.min(site.heroOverlayStrength, 1) }} />
           <div className="settings-hero-preview-copy">
             <span>{site.heroEyebrow}</span>
             <strong>{site.heroTitle}</strong>
@@ -415,7 +451,7 @@ export function AdminSettings() {
           <div>
             <p className="eyebrow">Hero image</p>
             <h2>Replace homepage photo</h2>
-            <p>Upload the normal photo. Beet It handles the crop, positioning and gradient automatically.</p>
+            <p>Upload the normal photo. Then use the preview above to size, position and fade it before saving.</p>
           </div>
           <ImagePlus size={22} />
         </div>
