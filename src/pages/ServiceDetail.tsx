@@ -1,7 +1,29 @@
-import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  BriefcaseBusiness,
+  CheckCircle2,
+  FileCheck2,
+  HeartHandshake,
+  Scale,
+  ScrollText,
+  ShieldCheck,
+  UsersRound,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { getServiceBySlug } from '../config/services'
 import { useSeo } from '../lib/seo'
+
+const serviceIcons: Record<string, LucideIcon> = {
+  'cultural-impact-assessments': UsersRound,
+  'employment-advocacy': BriefcaseBusiness,
+  'maori-land-court-support': Scale,
+  'governance-and-compliance': FileCheck2,
+  'elderly-care-advocacy': HeartHandshake,
+  'insurance-claims-assistance': ShieldCheck,
+  'te-tiriti-treaty-research-advisory': ScrollText,
+}
 
 export function ServiceDetail() {
   const { slug = '' } = useParams()
@@ -27,10 +49,13 @@ export function ServiceDetail() {
     )
   }
 
+  const ServiceIcon = serviceIcons[service.slug] ?? ShieldCheck
+
   return (
-    <section className="page-section service-detail-page">
+    <section className={`page-section service-detail-page service-detail-${service.slug}`}>
       <div className="container service-detail-shell">
         <Link className="text-link service-back-link" to="/services"><ArrowLeft size={16} /> All services</Link>
+
         <div className="service-detail-heading">
           <p className="eyebrow">Service</p>
           <h1>{service.name}</h1>
@@ -39,19 +64,31 @@ export function ServiceDetail() {
 
         <div className="service-detail-grid">
           <article className="service-detail-card">
-            <h2>What Donna can help with</h2>
-            <ul className="service-check-list">
-              {service.helpWith.map((item) => <li key={item}><CheckCircle2 size={18} /> <span>{item}</span></li>)}
-            </ul>
+            <div className="service-detail-card-watermark" aria-hidden="true">
+              <ServiceIcon />
+            </div>
+            <div className="service-detail-card-content">
+              <p className="service-card-kicker">Support</p>
+              <h2>What Donna can help with</h2>
+              <ul className="service-check-list">
+                {service.helpWith.map((item) => <li key={item}><CheckCircle2 size={18} /> <span>{item}</span></li>)}
+              </ul>
+            </div>
           </article>
 
           <article className="service-detail-card">
-            <h2>What to expect</h2>
-            <ol className="service-steps">
-              {service.approach.map((item, index) => (
-                <li key={item}><span>{index + 1}</span><p>{item}</p></li>
-              ))}
-            </ol>
+            <div className="service-detail-card-watermark" aria-hidden="true">
+              <ServiceIcon />
+            </div>
+            <div className="service-detail-card-content">
+              <p className="service-card-kicker">Process</p>
+              <h2>What to expect</h2>
+              <ol className="service-steps">
+                {service.approach.map((item, index) => (
+                  <li key={item}><span>{index + 1}</span><p>{item}</p></li>
+                ))}
+              </ol>
+            </div>
           </article>
         </div>
 
