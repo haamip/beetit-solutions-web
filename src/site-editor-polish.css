@@ -1,0 +1,95 @@
+/* Keep the admin hero preview aligned with the live homepage treatment. */
+
+.hero-treatment-section .settings-form {
+  gap: 16px;
+}
+
+.settings-hero-preview {
+  min-height: var(--preview-height, 300px);
+}
+
+.settings-hero-preview-image {
+  inset: 0 0 0 auto;
+  width: 58%;
+  background-color: var(--cream);
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+}
+
+.settings-hero-preview-overlay {
+  background: linear-gradient(
+    90deg,
+    var(--cream) 0%,
+    var(--cream) 42%,
+    color-mix(in srgb, var(--cream) 96%, transparent) 46%,
+    color-mix(in srgb, var(--cream) 74%, transparent) 51%,
+    color-mix(in srgb, var(--cream) 42%, transparent) 56%,
+    color-mix(in srgb, var(--cream) 16%, transparent) 62%,
+    transparent 69%
+  );
+}
+
+.settings-hero-preview-copy {
+  width: min(49%, 520px);
+  min-height: var(--preview-height, 300px);
+  padding: 28px;
+}
+
+.settings-hero-preview-copy > strong {
+  max-width: 12ch;
+  font-size: clamp(1.65rem, 2.5vw, 2.45rem);
+  line-height: .99;
+  letter-spacing: -.035em;
+}
+
+.settings-hero-preview-copy p {
+  margin-top: 10px;
+  font-size: .84rem;
+  line-height: 1.55;
+}
+
+.hero-treatment-section .field-help {
+  line-height: 1.45;
+}
+
+@media (max-width: 800px) {
+  .settings-hero-preview-image {
+    width: 66%;
+  }
+
+  .settings-hero-preview-copy {
+    width: 58%;
+  }
+}
+
+@media (max-width: 620px) {
+  .settings-hero-preview {
+    min-height: 430px;
+  }
+
+  .settings-hero-preview-image {
+    inset: 0 0 auto;
+    width: 100%;
+    height: 55%;
+    background-size: cover !important;
+    background-position: center top !important;
+  }
+
+  .settings-hero-preview-overlay {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      color-mix(in srgb, var(--cream) 12%, transparent) 30%,
+      color-mix(in srgb, var(--cream) 76%, transparent) 47%,
+      var(--cream) 61%,
+      var(--cream) 100%
+    );
+  }
+
+  .settings-hero-preview-copy {
+    width: 100%;
+    min-height: 430px;
+    align-content: end;
+    padding: 220px 24px 26px;
+  }
+}
