@@ -1,0 +1,235 @@
+.services-showcase {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 14%, rgba(109, 115, 85, 0.08), transparent 24%),
+    radial-gradient(circle at 92% 86%, rgba(214, 183, 110, 0.1), transparent 28%),
+    #ebe7dc;
+}
+
+.services-showcase-heading {
+  margin-bottom: 40px;
+}
+
+.services-showcase-heading h2 {
+  max-width: 900px;
+  margin-bottom: 0;
+}
+
+.service-grid-premium {
+  gap: 20px;
+}
+
+.service-card-link {
+  position: relative;
+  display: block;
+  min-width: 0;
+  border-radius: 22px;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.service-card-link:hover {
+  transform: translateY(-4px);
+  filter: drop-shadow(0 20px 24px rgba(45, 49, 40, 0.08));
+}
+
+.service-card.service-card-premium {
+  position: relative;
+  min-height: 265px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 26px;
+  padding: 30px;
+  overflow: hidden;
+  border: 1px solid rgba(67, 74, 56, 0.14);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(255, 254, 250, 0.98), rgba(250, 247, 239, 0.93));
+  box-shadow: 0 20px 55px rgba(57, 56, 46, 0.065);
+  isolation: isolate;
+}
+
+.service-card.service-card-premium::before,
+.service-card.service-card-premium::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.service-card.service-card-premium::before {
+  right: -48px;
+  bottom: -68px;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(109, 115, 85, 0.15), rgba(109, 115, 85, 0.02) 62%, transparent 68%);
+}
+
+.service-card.service-card-premium::after {
+  right: 0;
+  bottom: 0;
+  width: 48%;
+  height: 70%;
+  opacity: 0.34;
+}
+
+.service-card-cultural .service-card-premium::after {
+  background:
+    linear-gradient(72deg, transparent 28%, rgba(109, 115, 85, 0.13) 29%, transparent 31%),
+    linear-gradient(82deg, transparent 45%, rgba(109, 115, 85, 0.11) 46%, transparent 48%),
+    linear-gradient(65deg, transparent 58%, rgba(109, 115, 85, 0.09) 59%, transparent 61%);
+  transform: rotate(-8deg) scale(1.2);
+  transform-origin: bottom right;
+}
+
+.service-card-employment .service-card-premium::after {
+  background:
+    linear-gradient(152deg, transparent 24%, rgba(109, 115, 85, 0.06) 25% 42%, transparent 43%),
+    linear-gradient(165deg, transparent 38%, rgba(109, 115, 85, 0.1) 39% 57%, transparent 58%),
+    linear-gradient(176deg, transparent 52%, rgba(109, 115, 85, 0.07) 53% 68%, transparent 69%);
+}
+
+.service-card-land .service-card-premium::after {
+  width: 42%;
+  height: 100%;
+  background:
+    repeating-radial-gradient(circle at 115% 50%, rgba(109, 115, 85, 0.14) 0 2px, transparent 2px 19px);
+  opacity: 0.28;
+}
+
+.service-card-governance .service-card-premium::after {
+  width: 55%;
+  height: 76%;
+  background:
+    repeating-radial-gradient(ellipse at 120% 115%, transparent 0 17px, rgba(109, 115, 85, 0.13) 18px 20px, transparent 21px 36px);
+  opacity: 0.34;
+}
+
+.service-card-care .service-card-premium::after {
+  width: 48%;
+  height: 84%;
+  background:
+    radial-gradient(ellipse at 65% 78%, rgba(109, 115, 85, 0.13) 0 13%, transparent 14%),
+    radial-gradient(ellipse at 82% 58%, rgba(109, 115, 85, 0.1) 0 12%, transparent 13%),
+    radial-gradient(ellipse at 58% 42%, rgba(109, 115, 85, 0.08) 0 11%, transparent 12%),
+    linear-gradient(62deg, transparent 48%, rgba(109, 115, 85, 0.1) 49% 51%, transparent 52%);
+  transform: rotate(-10deg);
+}
+
+.service-card-insurance .service-card-premium::after {
+  width: 55%;
+  height: 64%;
+  background:
+    linear-gradient(168deg, transparent 34%, rgba(109, 115, 85, 0.08) 35% 47%, transparent 48%),
+    linear-gradient(177deg, transparent 48%, rgba(109, 115, 85, 0.11) 49% 61%, transparent 62%),
+    linear-gradient(185deg, transparent 58%, rgba(109, 115, 85, 0.08) 59% 72%, transparent 73%);
+}
+
+.service-card-topline {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.service-icon-badge {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(109, 115, 85, 0.13);
+  color: var(--olive-dark);
+  box-shadow: inset 0 0 0 1px rgba(67, 74, 56, 0.05);
+}
+
+.service-category {
+  color: var(--olive-dark);
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.service-card-content {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+}
+
+.service-card.service-card-premium h3 {
+  max-width: 15ch;
+  margin: 0;
+  font-size: clamp(1.55rem, 2.2vw, 2rem);
+  line-height: 1.02;
+}
+
+.service-accent-line {
+  display: block;
+  width: 38px;
+  height: 2px;
+  margin-top: 16px;
+  background: var(--olive);
+  transition: width 180ms ease;
+}
+
+.service-card-link:hover .service-accent-line {
+  width: 58px;
+}
+
+.service-card-action {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--olive-dark);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.service-card-arrow {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(109, 115, 85, 0.14);
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.service-card-link:hover .service-card-arrow {
+  transform: translateX(4px);
+  background: rgba(109, 115, 85, 0.22);
+}
+
+@media (max-width: 850px) {
+  .service-card.service-card-premium {
+    min-height: 245px;
+  }
+}
+
+@media (max-width: 580px) {
+  .services-showcase-heading {
+    align-items: flex-start;
+  }
+
+  .service-grid-premium {
+    grid-template-columns: 1fr;
+  }
+
+  .service-card.service-card-premium {
+    min-height: 230px;
+    padding: 26px;
+  }
+
+  .service-card.service-card-premium h3 {
+    font-size: 1.65rem;
+  }
+}
