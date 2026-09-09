@@ -8,7 +8,7 @@ type LegalPageProps = {
 function PrivacyPolicy() {
   return (
     <>
-      <p className="legal-updated">Last updated 9 September 2026</p>
+      <p className="legal-updated">Last updated 10 September 2026</p>
       <p>
         Beet It Solutions respects your privacy and handles personal information with care. This policy explains what information is collected through this website and client administration platform, why it is used, and how you can ask to access or correct it.
       </p>
@@ -18,13 +18,13 @@ function PrivacyPolicy() {
       <ul>
         <li>your name, email address, phone number and messages you send us</li>
         <li>booking information including the service requested, consultation type, appointment time and important dates or deadlines</li>
-        <li>client record information created during an engagement, including private notes and documents supplied or created for the matter</li>
+        <li>client record information created during an engagement, including numbered matters, private notes and documents supplied or created for the matter</li>
         <li>your date of birth and a copy of an identity document when identity verification is required</li>
         <li>basic technical and security information needed to operate and protect the website and admin system</li>
       </ul>
 
       <h2>Why we use your information</h2>
-      <p>Personal information is used to respond to enquiries, manage bookings, provide agreed advocacy or advisory services, maintain accurate client records, verify identity when necessary, communicate with you, protect the platform, and meet legal or administrative obligations.</p>
+      <p>Personal information is used to respond to enquiries, manage bookings, provide agreed advocacy or advisory services, maintain accurate client and matter records, verify identity when necessary, communicate with you, protect the platform, and meet legal or administrative obligations.</p>
 
       <h2>Identity documents and date of birth</h2>
       <p>
@@ -46,9 +46,12 @@ function PrivacyPolicy() {
         Reasonable technical and organisational safeguards are used to protect client information. The administration area requires authorised sign in, client documents are stored privately, and access is restricted to approved administrators. No internet based system can be guaranteed to be completely risk free, so security is reviewed as the platform develops.
       </p>
 
-      <h2>Retention</h2>
+      <h2>Retention and permanent deletion</h2>
       <p>
-        Information is kept only for as long as it is reasonably needed for the purpose it was collected, for ongoing client administration, or to meet legal, accounting, dispute, or record keeping requirements. Information that is no longer required may be securely deleted or archived.
+        Information is kept only for as long as it is reasonably needed for the purpose it was collected, for ongoing client administration, or to meet legal, accounting, dispute, or record keeping requirements. Authorised administrators may archive records that should be retained but are no longer active.
+      </p>
+      <p>
+        Where Beet It Solutions is permitted to permanently delete a client record, the platform can remove the client profile, numbered matters, private notes, stored work documents, identity documents and secure upload links from active client storage. This action is irreversible. Existing booking or enquiry records may be detached from the deleted client record and retained where reasonably required for operational, legal or record keeping purposes.
       </p>
 
       <h2>Your rights</h2>
@@ -67,9 +70,9 @@ function PrivacyPolicy() {
 function WebsiteTerms() {
   return (
     <>
-      <p className="legal-updated">Last updated 9 September 2026</p>
+      <p className="legal-updated">Last updated 10 September 2026</p>
       <p>
-        These terms apply when you use the Beet It Solutions website, booking system and secure client upload features. By using the website you agree to use it lawfully and in accordance with these terms.
+        These terms apply when you use the Beet It Solutions website, booking system, secure client upload features and client administration services. By using the website you agree to use it lawfully and in accordance with these terms.
       </p>
 
       <h2>General information</h2>
@@ -92,9 +95,22 @@ function WebsiteTerms() {
         You are responsible for providing information that is accurate and complete to the best of your knowledge, supplying relevant documents when requested, keeping your contact details current and letting Beet It Solutions know about important deadlines or changes that may affect your matter.
       </p>
 
+      <h2>Client records and matters</h2>
+      <p>
+        Beet It Solutions may maintain one client record for a person and create separate numbered matters for different pieces of work. Notes, documents, bookings and other information may be linked to the relevant matter so records remain organised and can be managed accurately.
+      </p>
+
       <h2>Secure uploads</h2>
       <p>
         Secure identity upload links are intended only for the person they are sent to. Do not share a secure link with another person. Upload only documents relevant to the request and contact Beet It Solutions if a link was received unexpectedly.
+      </p>
+
+      <h2>Administrative use and permanent deletion</h2>
+      <p>
+        Authorised administrators may correct, update, archive or permanently delete client records where appropriate. Permanent deletion is protected by multiple confirmation steps and is irreversible. When used, it removes the client profile, matters, private notes and stored client documents, including identity files, from active client storage. Existing booking or enquiry records may remain in detached form where they are reasonably required for operational, legal or record keeping purposes.
+      </p>
+      <p>
+        Permanent deletion should only be used when Beet It Solutions is permitted to remove the relevant records and no legal or record keeping obligation requires them to be retained.
       </p>
 
       <h2>Privacy and confidentiality</h2>
