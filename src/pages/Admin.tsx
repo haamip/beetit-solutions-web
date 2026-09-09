@@ -10,7 +10,6 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { siteConfig } from '../config/site'
 import { useSeo } from '../lib/seo'
 import { supabase } from '../lib/supabase'
 
@@ -19,6 +18,11 @@ type AdminProfile = {
   email: string
   full_name: string | null
 }
+
+const authorisedAdmins = {
+  'haami@haktindustries.co.nz': 'Haami Phillips',
+  'beetit.solutions@gmail.com': 'Donna Pokere Phillips',
+} as const
 
 const adminNav = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -30,6 +34,7 @@ const adminNav = [
 export function Admin() {
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [profile, setProfile] = useState<AdminProfile | null>(null)
+  const [loginEmail, setLoginEmail] = useState('haami@haktindustries.co.nz')
   const [loginSent, setLoginSent] = useState(false)
   const [loginError, setLoginError] = useState('')
   const [navOpen, setNavOpen] = useState(false)
@@ -98,12 +103,20 @@ export function Admin() {
       return
     }
 
+    const normalizedEmail = loginEmail.trim().toLowerCase()
+    const fullName = authorisedAdmins[normalizedEmail as keyof typeof authorisedAdmins]
+
+    if (!fullName) {
+      setLoginError('That email address is not approved for admin access.')
+      return
+    }
+
     const { error } = await supabase.auth.signInWithOtp({
-      email: siteConfig.email,
+      email: normalizedEmail,
       options: {
         shouldCreateUser: true,
         emailRedirectTo: `${window.location.origin}/admin`,
-        data: { full_name: 'Donna Pokere Phillips' },
+        data: { full_name: fullName },
       },
     })
 
@@ -112,6 +125,7 @@ export function Admin() {
       return
     }
 
+    setLoginEmail(normalizedEmail)
     setLoginSent(true)
   }
 
@@ -138,17 +152,23 @@ export function Admin() {
         <form className="admin-card" onSubmit={handleLogin}>
           <LockKeyhole size={30} />
           <p className="eyebrow">Secure admin</p>
-          <h1>Donna's dashboard</h1>
-          <p>Admin access is restricted to Donna's approved Beet It Solutions email address.</p>
+          <h1>Admin dashboard</h1>
+          <p>Sign in with an approved Beet It Solutions or HAKT Industries admin email address.</p>
 
           <label className="admin-email-label">
             Admin email
-            <input type="email" value={siteConfig.email} readOnly aria-readonly="true" />
+            <input
+              type="email"
+              value={loginEmail}
+              onChange={(event) => setLoginEmail(event.target.value)}
+              autoComplete="email"
+              required
+            />
           </label>
 
           {loginSent && (
             <div className="form-status success" role="status">
-              Check {siteConfig.email} for the secure sign in link.
+              Check {loginEmail} for the secure sign in link.
             </div>
           )}
           {loginError && <div className="form-status error" role="alert">{loginError}</div>}
