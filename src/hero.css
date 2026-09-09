@@ -1,6 +1,6 @@
 .hero-photo-section {
   position: relative;
-  min-height: 400px;
+  min-height: 430px;
   display: flex;
   align-items: stretch;
   overflow: hidden;
@@ -16,7 +16,7 @@
   background-repeat: no-repeat;
   background-position: 72% center;
   background-size: cover;
-  transform: scale(1.002);
+  transform: scale(1.01);
 }
 
 .hero-photo-section::after {
@@ -26,40 +26,43 @@
   background:
     linear-gradient(
       90deg,
-      rgba(245, 241, 232, 0.99) 0%,
-      rgba(245, 241, 232, 0.97) 30%,
-      rgba(245, 241, 232, 0.88) 45%,
-      rgba(245, 241, 232, 0.42) 62%,
-      rgba(245, 241, 232, 0.10) 82%,
-      rgba(245, 241, 232, 0.03) 100%
+      rgba(245, 241, 232, 0.98) 0%,
+      rgba(245, 241, 232, 0.96) 31%,
+      rgba(245, 241, 232, 0.84) 45%,
+      rgba(245, 241, 232, 0.30) 61%,
+      rgba(245, 241, 232, 0.04) 78%
     );
 }
 
 .hero-wide {
   position: relative;
   z-index: 1;
-  min-height: 400px;
+  min-height: 430px;
   display: flex;
   align-items: center;
-  padding-top: clamp(34px, 4vw, 50px);
-  padding-bottom: clamp(34px, 4vw, 50px);
+  padding-top: clamp(36px, 4vw, 48px);
+  padding-bottom: clamp(36px, 4vw, 48px);
 }
 
 .hero-wide .hero-copy {
-  width: min(620px, 54%);
+  width: min(680px, 56%);
 }
 
 .hero-wide h1 {
-  max-width: 10.5ch;
+  max-width: 13ch;
+  margin-bottom: 1rem;
+  font-size: clamp(3.4rem, 5vw, 4.65rem);
 }
 
 .hero-wide .hero-lead {
-  max-width: 590px;
+  max-width: 600px;
+  margin-bottom: 1.35rem;
+  font-size: clamp(1rem, 1.3vw, 1.18rem);
 }
 
 @media (min-width: 1180px) {
   .hero-photo-section::before {
-    background-size: auto 100%;
+    background-size: auto 118%;
     background-position: calc(50% + 300px) center;
     background-color: #d7d9cf;
   }
@@ -78,30 +81,37 @@
     background:
       linear-gradient(
         90deg,
-        rgba(245, 241, 232, 0.98) 0%,
-        rgba(245, 241, 232, 0.94) 42%,
-        rgba(245, 241, 232, 0.60) 69%,
-        rgba(245, 241, 232, 0.22) 100%
+        rgba(245, 241, 232, 0.97) 0%,
+        rgba(245, 241, 232, 0.92) 42%,
+        rgba(245, 241, 232, 0.53) 67%,
+        rgba(245, 241, 232, 0.18) 100%
       );
   }
 
   .hero-wide {
     min-height: 500px;
+    padding-top: 42px;
+    padding-bottom: 42px;
   }
 
   .hero-wide .hero-copy {
-    width: min(600px, 68%);
+    width: min(600px, 70%);
+  }
+
+  .hero-wide h1 {
+    max-width: 12ch;
+    font-size: clamp(3rem, 7vw, 4.1rem);
   }
 }
 
 @media (max-width: 580px) {
   .hero-photo-section {
-    min-height: 570px;
+    min-height: 590px;
     align-items: flex-end;
   }
 
   .hero-photo-section::before {
-    background-size: auto 48%;
+    background-size: auto 54%;
     background-position: center top;
     background-color: #e2e0d7;
   }
@@ -111,18 +121,18 @@
       linear-gradient(
         180deg,
         rgba(245, 241, 232, 0.02) 0%,
-        rgba(245, 241, 232, 0.10) 28%,
-        rgba(245, 241, 232, 0.94) 46%,
-        rgba(245, 241, 232, 1) 61%,
+        rgba(245, 241, 232, 0.10) 31%,
+        rgba(245, 241, 232, 0.94) 49%,
+        rgba(245, 241, 232, 1) 64%,
         rgba(245, 241, 232, 1) 100%
       );
   }
 
   .hero-wide {
-    min-height: 570px;
+    min-height: 590px;
     align-items: flex-end;
-    padding-top: 220px;
-    padding-bottom: 42px;
+    padding-top: 235px;
+    padding-bottom: 44px;
   }
 
   .hero-wide .hero-copy {
@@ -131,5 +141,6 @@
 
   .hero-wide h1 {
     max-width: 11ch;
+    font-size: clamp(2.7rem, 12vw, 3.6rem);
   }
 }
