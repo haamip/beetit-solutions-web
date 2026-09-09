@@ -5,11 +5,37 @@ export type AvailableSlot = {
   end_at: string
 }
 
-export async function getAvailableSlots(date: string) {
+type PublicPortalResponse = {
+  slots?: AvailableSlot[]
+  id?: string
+  emailSent?: boolean
+  error?: string
+}
+
+async function invokePublicPortal(body: Record<string, unknown>) {
   if (!supabase) throw new Error('Supabase is not configured')
-  const { data, error } = await supabase.rpc('get_available_slots', { p_date: date })
-  if (error) throw error
-  return (data ?? []) as AvailableSlot[]
+
+  const { data, error } = await supabase.functions.invoke<PublicPortalResponse>('public-portal', { body })
+  if (error) {
+    let message = error.message || 'The request could not be completed.'
+    const context = (error as { context?: Response }).context
+    if (context) {
+      try {
+        const detail = await context.clone().json() as { error?: string }
+        if (detail.error) message = detail.error
+      } catch {
+        // Keep the safe fallback message.
+      }
+    }
+    throw new Error(message)
+  }
+  if (data?.error) throw new Error(data.error)
+  return data ?? {}
+}
+
+export async function getAvailableSlots(date: string) {
+  const data = await invokePublicPortal({ action: 'availability', date })
+  return data.slots ?? []
 }
 
 export async function submitBooking(payload: {
@@ -23,22 +49,9 @@ export async function submitBooking(payload: {
   message?: string
   privacyConsent: boolean
 }) {
-  if (!supabase) throw new Error('Supabase is not configured')
-
-  const { data, error } = await supabase.rpc('submit_booking_request', {
-    p_full_name: payload.fullName,
-    p_email: payload.email,
-    p_phone: payload.phone,
-    p_service: payload.service,
-    p_consultation_type: payload.consultationType,
-    p_start_at: payload.startAt,
-    p_important_date: payload.importantDate || null,
-    p_message: payload.message || null,
-    p_privacy_consent: payload.privacyConsent,
-  })
-
-  if (error) throw error
-  return data as string
+  const data = await invokePublicPortal({ action: 'booking', booking: payload })
+  if (!data.id) throw new Error('Booking could not be submitted')
+  return { id: data.id, emailSent: data.emailSent === true }
 }
 
 export async function submitContact(payload: {
@@ -47,17 +60,9 @@ export async function submitContact(payload: {
   phone?: string
   message: string
 }) {
-  if (!supabase) throw new Error('Supabase is not configured')
-
-  const { data, error } = await supabase.rpc('submit_contact_inquiry', {
-    p_name: payload.name,
-    p_email: payload.email,
-    p_phone: payload.phone || null,
-    p_message: payload.message,
-  })
-
-  if (error) throw error
-  return data as string
+  const data = await invokePublicPortal({ action: 'contact', inquiry: payload })
+  if (!data.id) throw new Error('Enquiry could not be submitted')
+  return { id: data.id, emailSent: data.emailSent === true }
 }
 
 export function formatNzTime(iso: string) {
