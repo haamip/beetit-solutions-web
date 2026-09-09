@@ -1,8 +1,56 @@
-import { ArrowRight, ShieldCheck } from 'lucide-react'
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  FileCheck2,
+  HeartHandshake,
+  Scale,
+  ShieldCheck,
+  UsersRound,
+} from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { siteConfig } from '../config/site'
+import { serviceDetails } from '../config/services'
 import { useSeo } from '../lib/seo'
 import '../hero.css'
+
+const homeServices = [
+  {
+    name: 'Cultural Impact Assessments',
+    category: 'People & Community',
+    Icon: UsersRound,
+    variant: 'cultural',
+  },
+  {
+    name: 'Employment Advocacy',
+    category: 'Work & Opportunity',
+    Icon: BriefcaseBusiness,
+    variant: 'employment',
+  },
+  {
+    name: 'Māori Land Court Support',
+    category: 'Te Tiriti & Land',
+    Icon: Scale,
+    variant: 'land',
+  },
+  {
+    name: 'Governance and Compliance',
+    category: 'Risk & Accountability',
+    Icon: FileCheck2,
+    variant: 'governance',
+  },
+  {
+    name: 'Elderly Care Advocacy',
+    category: 'People at Every Stage',
+    Icon: HeartHandshake,
+    variant: 'care',
+  },
+  {
+    name: 'Insurance Claims Assistance',
+    category: 'Access & Entitlements',
+    Icon: ShieldCheck,
+    variant: 'insurance',
+  },
+] as const
 
 export function Home() {
   useSeo({
@@ -50,9 +98,9 @@ export function Home() {
         </div>
       </section>
 
-      <section className="section section-soft">
+      <section className="section section-soft services-showcase">
         <div className="container">
-          <div className="section-heading">
+          <div className="section-heading services-showcase-heading">
             <div>
               <p className="eyebrow">Services</p>
               <h2>Support across a range of matters.</h2>
@@ -62,13 +110,33 @@ export function Home() {
             </Link>
           </div>
 
-          <div className="service-grid">
-            {siteConfig.services.slice(0, 6).map((service) => (
-              <article className="service-card" key={service}>
-                <ShieldCheck size={22} />
-                <h3>{service}</h3>
-              </article>
-            ))}
+          <div className="service-grid service-grid-premium">
+            {homeServices.map(({ name, category, Icon, variant }) => {
+              const detail = serviceDetails.find((service) => service.name === name)
+              return (
+                <Link
+                  className={`service-card-link service-card-${variant}`}
+                  key={name}
+                  to={detail ? `/services/${detail.slug}` : '/services'}
+                  aria-label={`Learn more about ${name}`}
+                >
+                  <article className="service-card service-card-premium">
+                    <div className="service-card-topline">
+                      <span className="service-icon-badge"><Icon size={20} strokeWidth={1.8} /></span>
+                      <span className="service-category">{category}</span>
+                    </div>
+                    <div className="service-card-content">
+                      <h3>{name}</h3>
+                      <span className="service-accent-line" aria-hidden="true" />
+                    </div>
+                    <div className="service-card-action">
+                      <span>Learn more</span>
+                      <span className="service-card-arrow" aria-hidden="true"><ArrowRight size={18} /></span>
+                    </div>
+                  </article>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>
