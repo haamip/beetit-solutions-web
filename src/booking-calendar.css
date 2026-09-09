@@ -159,6 +159,11 @@
   background: #f0ece3;
 }
 
+.availability-day.unavailable {
+  border-color: rgba(137, 111, 65, 0.28);
+  background: #f6efe1;
+}
+
 .availability-weekday,
 .availability-month {
   padding-inline: 4px;
@@ -188,6 +193,11 @@
 .availability-day.loading .availability-weekday,
 .availability-day.loading .availability-month {
   color: #86887f;
+}
+
+.availability-day.unavailable .availability-weekday,
+.availability-day.unavailable .availability-month {
+  color: #846f4c;
 }
 
 .availability-status {
@@ -236,6 +246,12 @@
   border-color: rgba(115, 115, 105, 0.1);
   background: rgba(115, 115, 105, 0.11);
   color: #6f7069;
+}
+
+.availability-status.unavailable {
+  border-color: rgba(137, 111, 65, 0.14);
+  background: rgba(214, 183, 110, 0.16);
+  color: #785f32;
 }
 
 .slot-button {
