@@ -12,6 +12,7 @@ import { siteConfig } from '../config/site'
 import { serviceDetails } from '../config/services'
 import { useSeo } from '../lib/seo'
 import '../hero.css'
+import '../services-home.css'
 
 const homeServices = [
   {
