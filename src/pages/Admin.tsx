@@ -1,9 +1,11 @@
 import {
   CalendarDays,
+  Inbox,
   LayoutDashboard,
   LockKeyhole,
   LogOut,
   Menu,
+  Settings,
   Users,
   X,
 } from 'lucide-react'
@@ -28,7 +30,9 @@ const adminNav = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/bookings', label: 'Bookings', icon: CalendarDays },
   { to: '/admin/calendar', label: 'Calendar', icon: CalendarDays },
+  { to: '/admin/enquiries', label: 'Enquiries', icon: Inbox },
   { to: '/admin/clients', label: 'Clients', icon: Users },
+  { to: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 export function Admin() {
