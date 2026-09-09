@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarDays, ShieldCheck } from 'lucide-react'
+import { ArrowRight, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { siteConfig } from '../config/site'
 import { useSeo } from '../lib/seo'
@@ -13,8 +13,8 @@ export function Home() {
 
   return (
     <>
-      <section className="hero-section">
-        <div className="container hero-grid">
+      <section className="hero-section hero-photo-section">
+        <div className="container hero-wide">
           <div className="hero-copy">
             <p className="eyebrow">Donna Pokere Phillips</p>
             <h1>Clear, practical advocacy and advisory support.</h1>
@@ -30,23 +30,6 @@ export function Home() {
               </Link>
             </div>
           </div>
-
-          <aside className="hero-portrait" aria-label="Donna Pokere Phillips consultation details">
-            <img
-              src="/donna-hero-mockup4.jpg"
-              alt="Donna Pokere Phillips"
-              loading="eager"
-              fetchPriority="high"
-            />
-            <div className="hero-portrait-caption">
-              <CalendarDays size={24} aria-hidden="true" />
-              <div>
-                <strong>60 minute consultations</strong>
-                <span>{siteConfig.bookingHours}</span>
-                <span>Friday by arrangement</span>
-              </div>
-            </div>
-          </aside>
         </div>
       </section>
 
