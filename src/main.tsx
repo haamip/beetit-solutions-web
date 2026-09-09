@@ -5,6 +5,7 @@ import './booking-admin.css'
 import './booking-calendar.css'
 import './admin.css'
 import './completion.css'
+import './service-detail-polish.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
