@@ -1,6 +1,6 @@
 .hero-photo-section {
   position: relative;
-  min-height: 480px;
+  min-height: 400px;
   display: flex;
   align-items: stretch;
   overflow: hidden;
@@ -16,7 +16,7 @@
   background-repeat: no-repeat;
   background-position: 72% center;
   background-size: cover;
-  transform: scale(1.005);
+  transform: scale(1.002);
 }
 
 .hero-photo-section::after {
@@ -26,22 +26,23 @@
   background:
     linear-gradient(
       90deg,
-      rgba(245, 241, 232, 0.98) 0%,
-      rgba(245, 241, 232, 0.96) 31%,
-      rgba(245, 241, 232, 0.84) 45%,
-      rgba(245, 241, 232, 0.30) 61%,
-      rgba(245, 241, 232, 0.04) 78%
+      rgba(245, 241, 232, 0.99) 0%,
+      rgba(245, 241, 232, 0.97) 30%,
+      rgba(245, 241, 232, 0.88) 45%,
+      rgba(245, 241, 232, 0.42) 62%,
+      rgba(245, 241, 232, 0.10) 82%,
+      rgba(245, 241, 232, 0.03) 100%
     );
 }
 
 .hero-wide {
   position: relative;
   z-index: 1;
-  min-height: 480px;
+  min-height: 400px;
   display: flex;
   align-items: center;
-  padding-top: clamp(52px, 6vw, 78px);
-  padding-bottom: clamp(52px, 6vw, 78px);
+  padding-top: clamp(34px, 4vw, 50px);
+  padding-bottom: clamp(34px, 4vw, 50px);
 }
 
 .hero-wide .hero-copy {
@@ -58,7 +59,7 @@
 
 @media (min-width: 1180px) {
   .hero-photo-section::before {
-    background-size: auto 108%;
+    background-size: auto 100%;
     background-position: calc(50% + 300px) center;
     background-color: #d7d9cf;
   }
@@ -66,7 +67,7 @@
 
 @media (max-width: 850px) {
   .hero-photo-section {
-    min-height: 560px;
+    min-height: 500px;
   }
 
   .hero-photo-section::before {
@@ -77,15 +78,15 @@
     background:
       linear-gradient(
         90deg,
-        rgba(245, 241, 232, 0.97) 0%,
-        rgba(245, 241, 232, 0.92) 42%,
-        rgba(245, 241, 232, 0.53) 67%,
-        rgba(245, 241, 232, 0.18) 100%
+        rgba(245, 241, 232, 0.98) 0%,
+        rgba(245, 241, 232, 0.94) 42%,
+        rgba(245, 241, 232, 0.60) 69%,
+        rgba(245, 241, 232, 0.22) 100%
       );
   }
 
   .hero-wide {
-    min-height: 560px;
+    min-height: 500px;
   }
 
   .hero-wide .hero-copy {
@@ -95,12 +96,12 @@
 
 @media (max-width: 580px) {
   .hero-photo-section {
-    min-height: 620px;
+    min-height: 570px;
     align-items: flex-end;
   }
 
   .hero-photo-section::before {
-    background-size: auto 52%;
+    background-size: auto 48%;
     background-position: center top;
     background-color: #e2e0d7;
   }
@@ -110,18 +111,18 @@
       linear-gradient(
         180deg,
         rgba(245, 241, 232, 0.02) 0%,
-        rgba(245, 241, 232, 0.10) 30%,
-        rgba(245, 241, 232, 0.94) 48%,
-        rgba(245, 241, 232, 1) 63%,
+        rgba(245, 241, 232, 0.10) 28%,
+        rgba(245, 241, 232, 0.94) 46%,
+        rgba(245, 241, 232, 1) 61%,
         rgba(245, 241, 232, 1) 100%
       );
   }
 
   .hero-wide {
-    min-height: 620px;
+    min-height: 570px;
     align-items: flex-end;
-    padding-top: 250px;
-    padding-bottom: 48px;
+    padding-top: 220px;
+    padding-bottom: 42px;
   }
 
   .hero-wide .hero-copy {
