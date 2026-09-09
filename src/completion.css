@@ -1,0 +1,493 @@
+/* Final scope additions: service detail pages, enquiries, settings, rescheduling and day/week calendar views. */
+
+.service-not-sure,
+.service-detail-cta {
+  margin-top: 32px;
+  padding: 28px 30px;
+  border: 1px solid rgba(67, 74, 56, .18);
+  border-radius: 24px;
+  background: rgba(244, 241, 232, .72);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.service-not-sure h2,
+.service-detail-cta h2 {
+  margin: 4px 0 8px;
+}
+
+.service-not-sure p:last-child,
+.service-detail-cta p:last-child {
+  margin-bottom: 0;
+}
+
+.service-detail-shell {
+  max-width: 1050px;
+}
+
+.service-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 24px;
+}
+
+.service-detail-heading {
+  max-width: 760px;
+  margin-bottom: 34px;
+}
+
+.service-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.service-detail-card {
+  padding: 28px;
+  border: 1px solid rgba(67, 74, 56, .16);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(44, 48, 38, .06);
+}
+
+.service-detail-card h2 {
+  margin-top: 0;
+}
+
+.service-check-list,
+.service-steps {
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.service-check-list li {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  margin: 0 0 15px;
+}
+
+.service-check-list svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+
+.service-steps li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+  align-items: start;
+  margin: 0 0 16px;
+}
+
+.service-steps li > span {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #434a38;
+  color: #fff;
+  font-weight: 800;
+  font-size: .8rem;
+}
+
+.service-steps p {
+  margin: 3px 0 0;
+}
+
+.service-detail-note {
+  margin-top: 22px;
+  padding: 18px 20px;
+  border-left: 3px solid #717862;
+  background: rgba(241, 239, 230, .7);
+}
+
+.service-detail-note p {
+  margin: 0;
+}
+
+.legal-copy {
+  max-width: 840px;
+}
+
+.legal-copy > h1 {
+  margin-bottom: 8px;
+}
+
+.legal-copy h2 {
+  margin-top: 34px;
+  margin-bottom: 10px;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+}
+
+.legal-copy p,
+.legal-copy li {
+  line-height: 1.75;
+}
+
+.legal-copy ul {
+  padding-left: 22px;
+}
+
+.legal-updated {
+  margin-top: 0;
+  font-size: .88rem;
+  opacity: .72;
+}
+
+.enquiry-list {
+  display: grid;
+  gap: 18px;
+}
+
+.enquiry-card {
+  padding: 24px;
+}
+
+.enquiry-card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 22px;
+  align-items: flex-start;
+}
+
+.enquiry-card-heading h2 {
+  margin: 7px 0 3px;
+}
+
+.enquiry-card-heading > div:first-child > span:last-child {
+  font-size: .82rem;
+  opacity: .68;
+}
+
+.enquiry-contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.enquiry-contact-links a {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  text-decoration: none;
+}
+
+.enquiry-message {
+  margin: 20px 0;
+  padding: 18px 20px;
+  border-radius: 15px;
+  background: rgba(241, 239, 230, .65);
+}
+
+.enquiry-message p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.enquiry-actions {
+  justify-content: flex-start;
+}
+
+.enquiry-card .status-pill {
+  display: inline-flex;
+  width: fit-content;
+  margin: 0;
+}
+
+.enquiry-card .status-pill.unread {
+  background: #f4e8bc;
+}
+
+.enquiry-card .status-pill.read {
+  background: #dfe6dc;
+}
+
+.enquiry-card .status-pill.converted {
+  background: #d8ead3;
+}
+
+.enquiry-card .status-pill.archived {
+  background: #e1dfdb;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.settings-form {
+  display: grid;
+  gap: 18px;
+}
+
+.settings-form label {
+  display: grid;
+  gap: 7px;
+  font-weight: 700;
+}
+
+.settings-form input {
+  width: 100%;
+}
+
+.field-help {
+  font-size: .8rem;
+  font-weight: 500;
+  opacity: .68;
+}
+
+.settings-summary-list {
+  display: grid;
+  gap: 0;
+}
+
+.settings-summary-list > div {
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(67, 74, 56, .12);
+  display: grid;
+  gap: 4px;
+}
+
+.settings-summary-list > div:last-child {
+  border-bottom: 0;
+}
+
+.settings-summary-list span {
+  font-size: .78rem;
+  opacity: .68;
+}
+
+.reschedule-panel {
+  margin-top: 22px;
+  padding: 22px;
+  border: 1px solid rgba(67, 74, 56, .18);
+  border-radius: 18px;
+  background: rgba(246, 244, 237, .9);
+}
+
+.reschedule-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.reschedule-heading > div {
+  display: grid;
+  gap: 3px;
+}
+
+.reschedule-heading span {
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  opacity: .68;
+}
+
+.reschedule-panel > label {
+  display: grid;
+  gap: 7px;
+  max-width: 280px;
+  font-weight: 700;
+}
+
+.admin-slot-grid {
+  margin-top: 16px;
+  margin-bottom: 18px;
+}
+
+.calendar-page-heading {
+  gap: 20px;
+}
+
+.calendar-view-toggle {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid rgba(67, 74, 56, .16);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.calendar-view-toggle button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 15px;
+  background: transparent;
+  color: inherit;
+  text-transform: capitalize;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.calendar-view-toggle button.active {
+  background: #434a38;
+  color: #fff;
+}
+
+.calendar-week-view {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  min-height: 440px;
+  border-top: 1px solid rgba(67, 74, 56, .12);
+}
+
+.calendar-week-column {
+  min-width: 0;
+  border: 0;
+  border-right: 1px solid rgba(67, 74, 56, .11);
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.calendar-week-column:last-child {
+  border-right: 0;
+}
+
+.calendar-week-column.selected {
+  background: rgba(225, 231, 216, .38);
+}
+
+.calendar-week-date {
+  min-height: 74px;
+  padding: 12px 8px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  border-bottom: 1px solid rgba(67, 74, 56, .11);
+}
+
+.calendar-week-date strong,
+.calendar-week-date small {
+  font-size: .72rem;
+  text-transform: uppercase;
+  opacity: .66;
+}
+
+.calendar-week-date b {
+  margin: 2px 0;
+  font-size: 1.2rem;
+}
+
+.calendar-week-events {
+  padding: 9px 7px;
+  display: grid;
+  gap: 8px;
+}
+
+.calendar-week-event {
+  display: grid;
+  gap: 2px;
+  padding: 9px;
+  border-radius: 10px;
+  background: rgba(219, 229, 211, .8);
+  font-size: .75rem;
+  line-height: 1.3;
+}
+
+.calendar-week-event strong {
+  font-size: .71rem;
+}
+
+.calendar-week-event small {
+  opacity: .72;
+}
+
+.calendar-week-event.blocked {
+  background: rgba(235, 221, 211, .8);
+}
+
+.calendar-week-empty {
+  padding: 12px 6px;
+  font-size: .76rem;
+  opacity: .58;
+}
+
+.calendar-day-timeline {
+  padding: 22px;
+}
+
+.calendar-day-timeline-heading {
+  margin-bottom: 18px;
+}
+
+.calendar-day-timeline-heading h3 {
+  margin: 4px 0 0;
+}
+
+.calendar-timeline-item {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+  align-items: center;
+  padding: 16px 12px;
+  border-top: 1px solid rgba(67, 74, 56, .12);
+}
+
+.calendar-timeline-item.blocked {
+  background: rgba(235, 221, 211, .34);
+}
+
+.calendar-timeline-item > div:last-child,
+.calendar-timeline-time {
+  display: grid;
+  gap: 3px;
+}
+
+.calendar-timeline-item span {
+  font-size: .82rem;
+  opacity: .7;
+}
+
+@media (max-width: 900px) {
+  .service-detail-grid,
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-week-view {
+    overflow-x: auto;
+    grid-template-columns: repeat(7, minmax(145px, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .service-not-sure,
+  .service-detail-cta,
+  .enquiry-card-heading,
+  .reschedule-heading,
+  .calendar-page-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .service-not-sure .button,
+  .service-detail-cta .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .enquiry-contact-links {
+    align-items: flex-start;
+  }
+
+  .calendar-view-toggle {
+    align-self: flex-start;
+  }
+
+  .calendar-timeline-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
