@@ -76,6 +76,7 @@ export function Admin() {
       return
     }
 
+    window.localStorage.removeItem('beetit_admin_login_pending')
     setProfile(adminProfile as AdminProfile)
     setCheckingAuth(false)
   }, [])
@@ -111,6 +112,8 @@ export function Admin() {
       return
     }
 
+    window.localStorage.setItem('beetit_admin_login_pending', '1')
+
     const { error } = await supabase.auth.signInWithOtp({
       email: normalizedEmail,
       options: {
@@ -121,6 +124,7 @@ export function Admin() {
     })
 
     if (error) {
+      window.localStorage.removeItem('beetit_admin_login_pending')
       setLoginError(error.message)
       return
     }
@@ -131,6 +135,7 @@ export function Admin() {
 
   async function handleSignOut() {
     if (!supabase) return
+    window.localStorage.removeItem('beetit_admin_login_pending')
     await supabase.auth.signOut()
     setProfile(null)
   }
