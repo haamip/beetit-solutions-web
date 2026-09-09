@@ -1,7 +1,26 @@
-import { ArrowRight } from 'lucide-react'
+import {
+  ArrowRight,
+  BookOpenCheck,
+  BriefcaseBusiness,
+  FileCheck2,
+  HeartHandshake,
+  Scale,
+  ShieldCheck,
+  UsersRound,
+} from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { serviceDetails } from '../config/services'
 import { useSeo } from '../lib/seo'
+
+const serviceMeta = {
+  'cultural-impact-assessments': { label: 'People & Community', Icon: UsersRound },
+  'employment-advocacy': { label: 'Work & Opportunity', Icon: BriefcaseBusiness },
+  'maori-land-court-support': { label: 'Te Tiriti & Land', Icon: Scale },
+  'governance-and-compliance': { label: 'Risk & Accountability', Icon: FileCheck2 },
+  'elderly-care-advocacy': { label: 'People at Every Stage', Icon: HeartHandshake },
+  'insurance-claims-assistance': { label: 'Access & Entitlements', Icon: ShieldCheck },
+  'te-tiriti-treaty-research-advisory': { label: 'Research & Advisory', Icon: BookOpenCheck },
+} as const
 
 export function Services() {
   useSeo({
@@ -11,37 +30,46 @@ export function Services() {
   })
 
   return (
-    <section className="page-section">
-      <div className="container narrow-heading">
-        <p className="eyebrow">Services</p>
-        <h1>Practical support, explained clearly.</h1>
-        <p>
-          Choose the area that best matches what you need help with. Each page explains the type of support available and what to expect next.
-        </p>
-      </div>
+    <section className="page-section services-index-page">
+      <div className="container services-index-shell">
+        <header className="services-index-heading">
+          <p className="eyebrow">Services</p>
+          <h1>Practical support for the matters that matter.</h1>
+          <p>Choose the area that best fits what you need. Each service page gives you the essentials without the legal jargon.</p>
+        </header>
 
-      <div className="container service-list">
-        {serviceDetails.map((service, index) => (
-          <article className="service-row" key={service.slug}>
-            <span className="service-number">{String(index + 1).padStart(2, '0')}</span>
-            <div>
-              <h2>{service.name}</h2>
-              <p>{service.summary}</p>
-            </div>
-            <Link aria-label={`Read about ${service.name}`} to={`/services/${service.slug}`}>
-              <ArrowRight size={22} />
-            </Link>
-          </article>
-        ))}
-      </div>
-
-      <div className="container service-not-sure">
-        <div>
-          <p className="eyebrow">Not sure where it fits?</p>
-          <h2>Start with a conversation.</h2>
-          <p>If your matter does not fit neatly into one of these areas, choose “Other / Not sure” when booking and briefly explain what you need help with.</p>
+        <div className="services-index-grid">
+          {serviceDetails.map((service, index) => {
+            const meta = serviceMeta[service.slug as keyof typeof serviceMeta]
+            const Icon = meta?.Icon ?? Scale
+            return (
+              <Link className="services-index-card" key={service.slug} to={`/services/${service.slug}`}>
+                <div className="services-index-card-top">
+                  <span className="services-index-number">{String(index + 1).padStart(2, '0')}</span>
+                  <span className="services-index-icon"><Icon size={19} strokeWidth={1.8} /></span>
+                </div>
+                <div className="services-index-card-copy">
+                  <span className="services-index-label">{meta?.label ?? 'Advisory support'}</span>
+                  <h2>{service.name}</h2>
+                  <p>{service.summary}</p>
+                </div>
+                <div className="services-index-card-action">
+                  <span>View service</span>
+                  <span className="services-index-arrow"><ArrowRight size={17} /></span>
+                </div>
+              </Link>
+            )
+          })}
         </div>
-        <Link className="button secondary" to="/book?service=Other%20%2F%20Not%20sure">Book a consultation <ArrowRight size={17} /></Link>
+
+        <div className="services-index-not-sure">
+          <div>
+            <p className="eyebrow">Not sure where it fits?</p>
+            <h2>Start with a conversation.</h2>
+            <p>If your matter does not fit neatly into one area, choose “Other / Not sure” when booking and briefly explain what you need help with.</p>
+          </div>
+          <Link className="button primary" to="/book?service=Other%20%2F%20Not%20sure">Book a consultation <ArrowRight size={17} /></Link>
+        </div>
       </div>
     </section>
   )
