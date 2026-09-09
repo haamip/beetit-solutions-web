@@ -1,0 +1,112 @@
+/* Crisp homepage treatment to match the tighter service pages. */
+
+.home-about {
+  padding-top: clamp(58px, 6vw, 82px);
+  padding-bottom: clamp(58px, 6vw, 82px);
+}
+
+.home-about .split-section {
+  grid-template-columns: minmax(0, .78fr) minmax(0, 1fr);
+  gap: clamp(42px, 6vw, 78px);
+  align-items: start;
+}
+
+.home-about h2 {
+  max-width: 12ch;
+  margin-bottom: 0;
+  font-size: clamp(2.25rem, 3.5vw, 3.15rem);
+  line-height: 1.01;
+  letter-spacing: -.035em;
+}
+
+.home-about .body-copy {
+  max-width: 620px;
+  font-size: 1rem;
+}
+
+.home-about .body-copy p {
+  margin-bottom: 14px;
+  line-height: 1.7;
+}
+
+.home-about .body-copy p:last-child {
+  margin-bottom: 0;
+}
+
+.home-services {
+  padding-top: clamp(64px, 6vw, 88px);
+  padding-bottom: clamp(64px, 6vw, 88px);
+}
+
+.home-services .services-showcase-heading {
+  align-items: end;
+  margin-bottom: 34px;
+}
+
+.home-services .services-showcase-heading h2 {
+  max-width: 15ch;
+  font-size: clamp(2.35rem, 3.8vw, 3.35rem);
+  line-height: 1.01;
+  letter-spacing: -.035em;
+}
+
+.home-services .service-card.service-card-premium {
+  min-height: 245px;
+  padding: 27px;
+}
+
+.home-services .service-card.service-card-premium h3 {
+  font-size: clamp(1.45rem, 1.9vw, 1.8rem);
+}
+
+.home-cta {
+  padding-top: clamp(54px, 5vw, 72px);
+  padding-bottom: clamp(54px, 5vw, 72px);
+}
+
+.home-cta .cta-card {
+  padding: clamp(26px, 4vw, 42px);
+}
+
+.home-cta .cta-card h2 {
+  font-size: clamp(2rem, 3.2vw, 2.9rem);
+  line-height: 1.02;
+  letter-spacing: -.03em;
+}
+
+.home-cta .cta-card p {
+  max-width: 590px;
+  margin-bottom: 0;
+  line-height: 1.65;
+}
+
+@media (max-width: 850px) {
+  .home-about .split-section {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+
+  .home-about h2,
+  .home-services .services-showcase-heading h2 {
+    max-width: 16ch;
+  }
+}
+
+@media (max-width: 580px) {
+  .home-about,
+  .home-services,
+  .home-cta {
+    padding-top: 52px;
+    padding-bottom: 52px;
+  }
+
+  .home-services .services-showcase-heading {
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .home-services .service-card.service-card-premium {
+    min-height: 220px;
+    padding: 24px;
+  }
+}
