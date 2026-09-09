@@ -12,6 +12,8 @@ type Client = {
   phone: string | null
   service_type: string | null
   important_date: string | null
+  date_of_birth: string | null
+  dob_confirmed_at: string | null
   status: string
   created_at: string
 }
@@ -33,7 +35,7 @@ export function AdminClients() {
 
     const { data, error: queryError } = await supabase
       .from('clients')
-      .select('id, full_name, email, phone, service_type, important_date, status, created_at')
+      .select('id, full_name, email, phone, service_type, important_date, date_of_birth, dob_confirmed_at, status, created_at')
       .order('full_name', { ascending: true })
 
     if (queryError) setError('Clients could not be loaded.')
@@ -76,13 +78,14 @@ export function AdminClients() {
       phone: String(data.get('phone') ?? '').trim() || null,
       service_type: String(data.get('serviceType') ?? '').trim() || null,
       important_date: String(data.get('importantDate') ?? '') || null,
+      date_of_birth: String(data.get('dateOfBirth') ?? '') || null,
       status: 'active',
     })
 
     if (insertError) {
       setError('The client could not be created.')
     } else {
-      setNotice('Client created.')
+      setNotice('Client created. Date of birth remains unconfirmed until an ID document has been received and checked.')
       form.reset()
       setShowCreate(false)
       await loadClients()
@@ -97,7 +100,7 @@ export function AdminClients() {
         <div>
           <p className="eyebrow">Client database</p>
           <h1>Clients</h1>
-          <p>Keep contact information, service details, important dates, notes and private documents together.</p>
+          <p>Keep contact information, service details, important dates, identity checks, notes and private documents together.</p>
         </div>
         <button className="button primary" type="button" onClick={() => setShowCreate((open) => !open)}>
           <Plus size={18} /> New client
@@ -134,6 +137,10 @@ export function AdminClients() {
             <label>
               Phone
               <input name="phone" type="tel" />
+            </label>
+            <label>
+              Date of birth <span className="optional">Optional until ID check</span>
+              <input name="dateOfBirth" type="date" />
             </label>
             <label>
               Important date <span className="optional">Optional</span>
@@ -178,6 +185,7 @@ export function AdminClients() {
                   <td>
                     <strong>{client.full_name}</strong>
                     {client.important_date && <span>Important date {client.important_date}</span>}
+                    {client.date_of_birth && <span>DOB {client.date_of_birth}{client.dob_confirmed_at ? ' · confirmed' : ' · unconfirmed'}</span>}
                   </td>
                   <td>
                     {client.email && <a href={`mailto:${client.email}`}><Mail size={15} /> {client.email}</a>}
