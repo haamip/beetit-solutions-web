@@ -191,19 +191,17 @@
 }
 
 .availability-status {
-  width: 58px;
-  min-width: 58px;
-  max-width: 58px;
+  width: 100%;
+  max-width: 72px;
   height: 30px;
   box-sizing: border-box;
   display: inline-flex;
-  flex: 0 0 58px;
   align-items: center;
   justify-content: center;
   justify-self: center;
-  gap: 3px;
+  gap: 4px;
   margin-top: auto;
-  padding: 0 3px;
+  padding: 0 4px;
   border: 1px solid transparent;
   border-radius: 999px;
   font-size: 0.62rem;
@@ -213,17 +211,6 @@
   text-align: center;
   text-transform: uppercase;
   white-space: nowrap;
-}
-
-.availability-status.loading {
-  overflow: hidden;
-  font-size: 0;
-}
-
-.availability-status.loading svg {
-  width: 13px;
-  height: 13px;
-  flex: 0 0 13px;
 }
 
 .availability-status.free {
@@ -293,15 +280,8 @@
   }
 
   .availability-status {
-    width: 62px;
-    min-width: 62px;
-    max-width: 62px;
-    height: 30px;
-    flex-basis: 62px;
-    font-size: 0.64rem;
-  }
-
-  .availability-status.loading {
-    font-size: 0;
+    max-width: 82px;
+    height: 32px;
+    font-size: 0.66rem;
   }
 }
