@@ -12,6 +12,8 @@ export type SiteSettings = {
   heroImageUrl: string
   heroPosition: string
   heroOverlayStrength: number
+  heroImageScale: number
+  heroHeight: number
   heroEyebrow: string
   heroTitle: string
   heroLead: string
@@ -28,6 +30,8 @@ export const defaultSiteSettings: SiteSettings = {
   heroImageUrl: '/donna-hero-mockup4.jpg',
   heroPosition: '72% center',
   heroOverlayStrength: 1,
+  heroImageScale: 1,
+  heroHeight: 410,
   heroEyebrow: 'Donna Pokere Phillips',
   heroTitle: 'Clear, practical advocacy and advisory support.',
   heroLead: 'Professional and culturally grounded support for individuals, whānau, organisations and communities.',
@@ -50,7 +54,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     if (!supabase) return
     const { data } = await supabase
       .from('site_settings')
-      .select('primary_color, background_color, accent_color, hero_image_path, hero_position, hero_overlay_strength, hero_eyebrow, hero_title, hero_lead, public_email, public_phone, public_location')
+      .select('primary_color, background_color, accent_color, hero_image_path, hero_position, hero_overlay_strength, hero_image_scale, hero_height, hero_eyebrow, hero_title, hero_lead, public_email, public_phone, public_location')
       .eq('id', 1)
       .maybeSingle()
 
@@ -62,7 +66,9 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
       heroImagePath: data.hero_image_path || null,
       heroImageUrl: publicAssetUrl(data.hero_image_path || null),
       heroPosition: data.hero_position || defaultSiteSettings.heroPosition,
-      heroOverlayStrength: Number(data.hero_overlay_strength ?? 1),
+      heroOverlayStrength: Number(data.hero_overlay_strength ?? defaultSiteSettings.heroOverlayStrength),
+      heroImageScale: Number(data.hero_image_scale ?? defaultSiteSettings.heroImageScale),
+      heroHeight: Number(data.hero_height ?? defaultSiteSettings.heroHeight),
       heroEyebrow: data.hero_eyebrow || defaultSiteSettings.heroEyebrow,
       heroTitle: data.hero_title || defaultSiteSettings.heroTitle,
       heroLead: data.hero_lead || defaultSiteSettings.heroLead,
