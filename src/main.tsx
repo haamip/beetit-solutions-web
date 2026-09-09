@@ -7,6 +7,7 @@ import './admin.css'
 import './completion.css'
 import './service-detail-polish.css'
 import './case-management.css'
+import './final-polish.css'
 import App from './App.tsx'
 import { SiteSettingsProvider } from './lib/siteSettings'
 
