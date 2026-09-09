@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { siteConfig } from '../config/site'
 import { supabase } from './supabase'
@@ -45,38 +45,38 @@ function publicAssetUrl(path: string | null) {
 export function SiteSettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings)
 
-  useEffect(() => {
-    let active = true
+  const loadSettings = useCallback(async () => {
     if (!supabase) return
-
-    void supabase
+    const { data } = await supabase
       .from('site_settings')
       .select('primary_color, background_color, accent_color, hero_image_path, hero_position, hero_overlay_strength, hero_eyebrow, hero_title, hero_lead, public_email, public_phone, public_location')
       .eq('id', 1)
       .maybeSingle()
-      .then(({ data }) => {
-        if (!active || !data) return
-        setSettings({
-          primaryColor: data.primary_color || defaultSiteSettings.primaryColor,
-          backgroundColor: data.background_color || defaultSiteSettings.backgroundColor,
-          accentColor: data.accent_color || defaultSiteSettings.accentColor,
-          heroImagePath: data.hero_image_path || null,
-          heroImageUrl: publicAssetUrl(data.hero_image_path || null),
-          heroPosition: data.hero_position || defaultSiteSettings.heroPosition,
-          heroOverlayStrength: Number(data.hero_overlay_strength ?? 1),
-          heroEyebrow: data.hero_eyebrow || defaultSiteSettings.heroEyebrow,
-          heroTitle: data.hero_title || defaultSiteSettings.heroTitle,
-          heroLead: data.hero_lead || defaultSiteSettings.heroLead,
-          publicEmail: data.public_email || defaultSiteSettings.publicEmail,
-          publicPhone: data.public_phone || defaultSiteSettings.publicPhone,
-          publicLocation: data.public_location || defaultSiteSettings.publicLocation,
-        })
-      })
 
-    return () => {
-      active = false
-    }
+    if (!data) return
+    setSettings({
+      primaryColor: data.primary_color || defaultSiteSettings.primaryColor,
+      backgroundColor: data.background_color || defaultSiteSettings.backgroundColor,
+      accentColor: data.accent_color || defaultSiteSettings.accentColor,
+      heroImagePath: data.hero_image_path || null,
+      heroImageUrl: publicAssetUrl(data.hero_image_path || null),
+      heroPosition: data.hero_position || defaultSiteSettings.heroPosition,
+      heroOverlayStrength: Number(data.hero_overlay_strength ?? 1),
+      heroEyebrow: data.hero_eyebrow || defaultSiteSettings.heroEyebrow,
+      heroTitle: data.hero_title || defaultSiteSettings.heroTitle,
+      heroLead: data.hero_lead || defaultSiteSettings.heroLead,
+      publicEmail: data.public_email || defaultSiteSettings.publicEmail,
+      publicPhone: data.public_phone || defaultSiteSettings.publicPhone,
+      publicLocation: data.public_location || defaultSiteSettings.publicLocation,
+    })
   }, [])
+
+  useEffect(() => {
+    void loadSettings()
+    const refresh = () => void loadSettings()
+    window.addEventListener('beetit-site-settings-updated', refresh)
+    return () => window.removeEventListener('beetit-site-settings-updated', refresh)
+  }, [loadSettings])
 
   useEffect(() => {
     const root = document.documentElement
