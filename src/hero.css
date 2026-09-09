@@ -1,6 +1,6 @@
 .hero-photo-section {
   position: relative;
-  min-height: 430px;
+  min-height: var(--hero-min-height, 410px);
   display: flex;
   align-items: stretch;
   overflow: hidden;
@@ -10,11 +10,13 @@
 
 .hero-photo-media {
   position: absolute;
-  inset: 0;
+  inset: 0 0 0 auto;
+  width: 58%;
   z-index: 0;
+  background-color: var(--hero-background, var(--cream));
   background-repeat: no-repeat;
-  background-size: cover;
-  transform: scale(1.01);
+  background-position: center;
+  background-size: 100% auto;
 }
 
 .hero-photo-gradient {
@@ -26,83 +28,106 @@
   background: linear-gradient(
     90deg,
     var(--hero-background, var(--cream)) 0%,
-    var(--hero-background, var(--cream)) 50%,
-    color-mix(in srgb, var(--hero-background, var(--cream)) 98%, transparent) 55%,
-    color-mix(in srgb, var(--hero-background, var(--cream)) 90%, transparent) 60%,
-    color-mix(in srgb, var(--hero-background, var(--cream)) 68%, transparent) 65%,
-    color-mix(in srgb, var(--hero-background, var(--cream)) 42%, transparent) 70%,
-    color-mix(in srgb, var(--hero-background, var(--cream)) 16%, transparent) 75%,
-    transparent 82%
+    var(--hero-background, var(--cream)) 42%,
+    color-mix(in srgb, var(--hero-background, var(--cream)) 96%, transparent) 46%,
+    color-mix(in srgb, var(--hero-background, var(--cream)) 74%, transparent) 51%,
+    color-mix(in srgb, var(--hero-background, var(--cream)) 42%, transparent) 56%,
+    color-mix(in srgb, var(--hero-background, var(--cream)) 16%, transparent) 62%,
+    transparent 69%
   );
 }
 
 .hero-wide {
   position: relative;
   z-index: 1;
-  min-height: 430px;
+  min-height: var(--hero-min-height, 410px);
   display: flex;
   align-items: center;
-  padding-top: clamp(36px, 4vw, 48px);
-  padding-bottom: clamp(36px, 4vw, 48px);
+  padding-top: clamp(30px, 3.2vw, 40px);
+  padding-bottom: clamp(30px, 3.2vw, 40px);
 }
 
 .hero-wide .hero-copy {
-  width: min(680px, 56%);
+  width: min(590px, 49%);
 }
 
 .hero-wide h1 {
-  max-width: 13ch;
-  margin-bottom: 1rem;
-  font-size: clamp(3.4rem, 5vw, 4.65rem);
+  max-width: 12ch;
+  margin-bottom: .9rem;
+  font-size: clamp(3rem, 4.25vw, 4.2rem);
+  line-height: .98;
+  letter-spacing: -.04em;
 }
 
 .hero-wide .hero-lead {
-  max-width: 600px;
-  margin-bottom: 1.35rem;
-  font-size: clamp(1rem, 1.3vw, 1.18rem);
+  max-width: 560px;
+  margin-bottom: 1.15rem;
+  font-size: clamp(1rem, 1.15vw, 1.1rem);
+  line-height: 1.65;
 }
 
-@media (max-width: 850px) {
-  .hero-photo-section,
-  .hero-wide {
-    min-height: 500px;
+.hero-wide .button-row {
+  margin-top: 26px;
+}
+
+@media (max-width: 980px) {
+  .hero-photo-media {
+    width: 62%;
   }
 
   .hero-photo-gradient {
     background: linear-gradient(
       90deg,
       var(--hero-background, var(--cream)) 0%,
-      color-mix(in srgb, var(--hero-background, var(--cream)) 94%, transparent) 40%,
-      color-mix(in srgb, var(--hero-background, var(--cream)) 58%, transparent) 68%,
-      color-mix(in srgb, var(--hero-background, var(--cream)) 18%, transparent) 100%
+      var(--hero-background, var(--cream)) 38%,
+      color-mix(in srgb, var(--hero-background, var(--cream)) 88%, transparent) 47%,
+      color-mix(in srgb, var(--hero-background, var(--cream)) 48%, transparent) 58%,
+      color-mix(in srgb, var(--hero-background, var(--cream)) 14%, transparent) 70%,
+      transparent 78%
     );
   }
 
-  .hero-wide {
-    padding-top: 42px;
-    padding-bottom: 42px;
-  }
-
   .hero-wide .hero-copy {
-    width: min(600px, 70%);
+    width: min(570px, 58%);
   }
 
   .hero-wide h1 {
-    max-width: 12ch;
-    font-size: clamp(3rem, 7vw, 4.1rem);
+    font-size: clamp(2.9rem, 5.5vw, 3.8rem);
+  }
+}
+
+@media (max-width: 850px) {
+  .hero-photo-section,
+  .hero-wide {
+    min-height: max(var(--hero-min-height, 410px), 500px);
+  }
+
+  .hero-photo-media {
+    width: 68%;
+  }
+
+  .hero-wide {
+    padding-top: 38px;
+    padding-bottom: 38px;
+  }
+
+  .hero-wide .hero-copy {
+    width: min(540px, 66%);
   }
 }
 
 @media (max-width: 580px) {
   .hero-photo-section {
-    min-height: 590px;
+    min-height: 570px;
     align-items: flex-end;
   }
 
   .hero-photo-media {
     inset: 0 0 auto;
-    height: 56%;
-    background-size: cover;
+    width: 100%;
+    height: 54%;
+    background-size: cover !important;
+    background-position: center top;
   }
 
   .hero-photo-gradient {
@@ -110,17 +135,17 @@
       180deg,
       transparent 0%,
       color-mix(in srgb, var(--hero-background, var(--cream)) 10%, transparent) 28%,
-      color-mix(in srgb, var(--hero-background, var(--cream)) 78%, transparent) 46%,
-      var(--hero-background, var(--cream)) 62%,
+      color-mix(in srgb, var(--hero-background, var(--cream)) 72%, transparent) 45%,
+      var(--hero-background, var(--cream)) 59%,
       var(--hero-background, var(--cream)) 100%
     );
   }
 
   .hero-wide {
-    min-height: 590px;
+    min-height: 570px;
     align-items: flex-end;
-    padding-top: 235px;
-    padding-bottom: 44px;
+    padding-top: 220px;
+    padding-bottom: 38px;
   }
 
   .hero-wide .hero-copy {
@@ -129,6 +154,11 @@
 
   .hero-wide h1 {
     max-width: 11ch;
-    font-size: clamp(2.7rem, 12vw, 3.6rem);
+    font-size: clamp(2.55rem, 11.5vw, 3.35rem);
+  }
+
+  .hero-wide .hero-lead {
+    max-width: 32rem;
+    font-size: 1rem;
   }
 }
