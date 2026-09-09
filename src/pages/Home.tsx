@@ -7,76 +7,57 @@ import {
   ShieldCheck,
   UsersRound,
 } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { siteConfig } from '../config/site'
 import { serviceDetails } from '../config/services'
 import { useSeo } from '../lib/seo'
+import { useSiteSettings } from '../lib/siteSettings'
 import '../hero.css'
 import '../services-home.css'
 
 const homeServices = [
-  {
-    name: 'Cultural Impact Assessments',
-    category: 'People & Community',
-    Icon: UsersRound,
-    variant: 'cultural',
-  },
-  {
-    name: 'Employment Advocacy',
-    category: 'Work & Opportunity',
-    Icon: BriefcaseBusiness,
-    variant: 'employment',
-  },
-  {
-    name: 'Māori Land Court Support',
-    category: 'Te Tiriti & Land',
-    Icon: Scale,
-    variant: 'land',
-  },
-  {
-    name: 'Governance and Compliance',
-    category: 'Risk & Accountability',
-    Icon: FileCheck2,
-    variant: 'governance',
-  },
-  {
-    name: 'Elderly Care Advocacy',
-    category: 'People at Every Stage',
-    Icon: HeartHandshake,
-    variant: 'care',
-  },
-  {
-    name: 'Insurance Claims Assistance',
-    category: 'Access & Entitlements',
-    Icon: ShieldCheck,
-    variant: 'insurance',
-  },
+  { name: 'Cultural Impact Assessments', category: 'People & Community', Icon: UsersRound, variant: 'cultural' },
+  { name: 'Employment Advocacy', category: 'Work & Opportunity', Icon: BriefcaseBusiness, variant: 'employment' },
+  { name: 'Māori Land Court Support', category: 'Te Tiriti & Land', Icon: Scale, variant: 'land' },
+  { name: 'Governance and Compliance', category: 'Risk & Accountability', Icon: FileCheck2, variant: 'governance' },
+  { name: 'Elderly Care Advocacy', category: 'People at Every Stage', Icon: HeartHandshake, variant: 'care' },
+  { name: 'Insurance Claims Assistance', category: 'Access & Entitlements', Icon: ShieldCheck, variant: 'insurance' },
 ] as const
 
 export function Home() {
+  const settings = useSiteSettings()
+
   useSeo({
     title: 'Legal Advocacy & Advisory',
     description: siteConfig.description,
     path: '/',
   })
 
+  const heroStyle = {
+    '--hero-fade-strength': settings.heroOverlayStrength,
+    '--hero-background': settings.backgroundColor,
+  } as CSSProperties
+
   return (
     <>
-      <section className="hero-section hero-photo-section">
+      <section className="hero-section hero-photo-section" style={heroStyle}>
+        <div
+          className="hero-photo-media"
+          aria-hidden="true"
+          style={{ backgroundImage: `url(${settings.heroImageUrl})`, backgroundPosition: settings.heroPosition }}
+        />
+        <div className="hero-photo-gradient" aria-hidden="true" />
         <div className="container hero-wide">
           <div className="hero-copy">
-            <p className="eyebrow">Donna Pokere Phillips</p>
-            <h1>Clear, practical advocacy and advisory support.</h1>
-            <p className="hero-lead">
-              Professional and culturally grounded support for individuals, whānau, organisations and communities.
-            </p>
+            <p className="eyebrow">{settings.heroEyebrow}</p>
+            <h1>{settings.heroTitle}</h1>
+            <p className="hero-lead">{settings.heroLead}</p>
             <div className="button-row">
               <Link className="button primary" to="/book">
                 Book a consultation <ArrowRight size={18} />
               </Link>
-              <Link className="button secondary" to="/services">
-                View services
-              </Link>
+              <Link className="button secondary" to="/services">View services</Link>
             </div>
           </div>
         </div>
@@ -89,12 +70,8 @@ export function Home() {
             <h2>Experience, clarity and a practical way forward.</h2>
           </div>
           <div className="body-copy">
-            <p>
-              Donna holds an LLB, LLM (Hons) and BA, with more than 20 years of experience across governance, policy, advocacy and advisory work.
-            </p>
-            <p>
-              Her approach is practical, respectful and culturally grounded, with a focus on helping people understand their options and move forward with confidence.
-            </p>
+            <p>Donna holds an LLB, LLM (Hons) and BA, with more than 20 years of experience across governance, policy, advocacy and advisory work.</p>
+            <p>Her approach is practical, respectful and culturally grounded, with a focus on helping people understand their options and move forward with confidence.</p>
           </div>
         </div>
       </section>
@@ -106,9 +83,7 @@ export function Home() {
               <p className="eyebrow">Services</p>
               <h2>Support across a range of matters.</h2>
             </div>
-            <Link className="text-link" to="/services">
-              View all services <ArrowRight size={17} />
-            </Link>
+            <Link className="text-link" to="/services">View all services <ArrowRight size={17} /></Link>
           </div>
 
           <div className="service-grid service-grid-premium">
@@ -149,9 +124,7 @@ export function Home() {
             <h2>Start with a consultation.</h2>
             <p>Tell Donna what you need help with and choose a suitable consultation time.</p>
           </div>
-          <Link className="button primary" to="/book">
-            Book now <ArrowRight size={18} />
-          </Link>
+          <Link className="button primary" to="/book">Book now <ArrowRight size={18} /></Link>
         </div>
       </section>
     </>
