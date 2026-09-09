@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  CircleHelp,
   Inbox,
   LayoutDashboard,
   LockKeyhole,
@@ -32,6 +33,7 @@ const adminNav = [
   { to: '/admin/calendar', label: 'Calendar', icon: CalendarDays },
   { to: '/admin/enquiries', label: 'Enquiries', icon: Inbox },
   { to: '/admin/clients', label: 'Clients', icon: Users },
+  { to: '/admin/help', label: 'Help', icon: CircleHelp },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
