@@ -128,6 +128,35 @@ export function AdminClientDetail() {
     setSaving(false)
   }
 
+  async function deleteNote(note: ClientNote) {
+    if (!supabase || !clientId || saving) return
+
+    const firstWarning = window.confirm('Delete this private note?')
+    if (!firstWarning) return
+
+    const secondWarning = window.confirm('Final warning: this permanently deletes the note and cannot be undone. Continue?')
+    if (!secondWarning) return
+
+    setSaving(true)
+    setError('')
+    setNotice('')
+
+    const { error: deleteError } = await supabase
+      .from('client_notes')
+      .delete()
+      .eq('id', note.id)
+      .eq('client_id', clientId)
+
+    if (deleteError) {
+      setError('The private note could not be deleted.')
+    } else {
+      setNotes((current) => current.filter((item) => item.id !== note.id))
+      setNotice('Private note deleted.')
+    }
+
+    setSaving(false)
+  }
+
   async function uploadDocument(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!supabase || !clientId) return
@@ -303,6 +332,9 @@ export function AdminClientDetail() {
               <article key={note.id}>
                 <p>{note.note}</p>
                 <span>{formatNzDateTime(note.created_at)}</span>
+                <button className="text-button" type="button" onClick={() => void deleteNote(note)} disabled={saving}>
+                  Delete note
+                </button>
               </article>
             )) : <p>No private notes yet.</p>}
           </div>
