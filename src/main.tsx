@@ -6,10 +6,14 @@ import './booking-calendar.css'
 import './admin.css'
 import './completion.css'
 import './service-detail-polish.css'
+import './case-management.css'
 import App from './App.tsx'
+import { SiteSettingsProvider } from './lib/siteSettings'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <SiteSettingsProvider>
+      <App />
+    </SiteSettingsProvider>
   </StrictMode>,
 )
