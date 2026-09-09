@@ -1,4 +1,4 @@
-import { ArrowLeft, CheckCircle2, Copy, Download, FileText, LoaderCircle, Plus, ShieldCheck, Trash2 } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Copy, Download, FileText, LoaderCircle, Mail, Plus, ShieldCheck, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -44,12 +44,13 @@ type ClientBooking = {
   status: string
 }
 
-async function sha256Hex(value: string) {
-  const bytes = new TextEncoder().encode(value)
-  const digest = await crypto.subtle.digest('SHA-256', bytes)
-  return Array.from(new Uint8Array(digest))
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('')
+type IdEmailResponse = {
+  sent?: boolean
+  reason?: 'email_not_configured' | 'email_failed'
+  uploadUrl?: string
+  email?: string
+  expiresAt?: string
+  error?: string
 }
 
 export function AdminClientDetail() {
@@ -260,36 +261,40 @@ export function AdminClientDetail() {
     }
   }
 
-  async function createIdUploadLink() {
-    if (!supabase || !clientId || linkWorking) return
+  async function emailIdUploadLink() {
+    if (!supabase || !clientId || !client || linkWorking) return
+
+    if (!client.email) {
+      setError('Add an email address to this client before sending an ID upload link.')
+      return
+    }
 
     setLinkWorking(true)
     setError('')
     setNotice('')
     setUploadLink('')
 
-    try {
-      const token = `${crypto.randomUUID().replaceAll('-', '')}${crypto.randomUUID().replaceAll('-', '')}`
-      const tokenHash = await sha256Hex(token)
-      const { data: sessionData } = await supabase.auth.getSession()
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    const { data, error: invokeError } = await supabase.functions.invoke<IdEmailResponse>('send-client-id-link', {
+      body: {
+        clientId,
+        origin: window.location.origin,
+      },
+    })
 
-      const { error: insertError } = await supabase.from('client_upload_links').insert({
-        client_id: clientId,
-        token_hash: tokenHash,
-        expires_at: expiresAt,
-        created_by: sessionData.session?.user.id ?? null,
-      })
-
-      if (insertError) throw insertError
-
-      setUploadLink(`${window.location.origin}/client-id/${token}`)
-      setNotice('Secure one-use ID upload link created. It expires in 7 days.')
-    } catch {
-      setError('A secure ID upload link could not be created.')
-    } finally {
-      setLinkWorking(false)
+    if (invokeError || data?.error) {
+      setError(data?.error || 'The secure ID upload email could not be sent.')
+    } else if (data?.sent) {
+      setNotice(`Secure ID upload link emailed to ${data.email || client.email}.`)
+    } else if (data?.uploadUrl) {
+      setUploadLink(data.uploadUrl)
+      setError(data.reason === 'email_not_configured'
+        ? 'Automatic email is not connected yet. A secure fallback link has been created below.'
+        : 'The email could not be delivered. Use the secure fallback link below.')
+    } else {
+      setError('The secure ID upload email could not be sent.')
     }
+
+    setLinkWorking(false)
   }
 
   async function copyIdUploadLink() {
@@ -554,17 +559,21 @@ export function AdminClientDetail() {
 
           <div className="identity-link-card">
             <strong>Client ID upload</strong>
-            <p className="identity-helper">Create a private one-use link for the client. The link expires after 7 days and the ID goes straight into secure client storage.</p>
+            <p className="identity-helper">
+              {client.email
+                ? `Email a private one-use upload link directly to ${client.email}. The link expires after 7 days.`
+                : 'Add an email address to this client before sending an ID upload link.'}
+            </p>
             <div className="identity-actions">
-              <button className="button primary" type="button" onClick={() => void createIdUploadLink()} disabled={linkWorking}>
-                {linkWorking ? 'Creating…' : identityReceived ? 'Create replacement upload link' : 'Create ID upload link'}
+              <button className="button primary" type="button" onClick={() => void emailIdUploadLink()} disabled={linkWorking || !client.email}>
+                <Mail size={17} /> {linkWorking ? 'Sending…' : identityReceived ? 'Email replacement ID link' : 'Email ID upload link'}
               </button>
             </div>
             {uploadLink && (
               <div className="identity-upload-link">
                 <code>{uploadLink}</code>
                 <button className="button secondary" type="button" onClick={() => void copyIdUploadLink()}>
-                  <Copy size={16} /> Copy link
+                  <Copy size={16} /> Copy fallback link
                 </button>
               </div>
             )}
