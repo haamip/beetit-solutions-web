@@ -5,35 +5,34 @@
   align-items: stretch;
   overflow: hidden;
   padding: 0;
-  background: #f5f1e8;
+  background: var(--hero-background, var(--cream));
 }
 
-.hero-photo-section::before {
-  content: "";
+.hero-photo-media {
   position: absolute;
   inset: 0;
-  background-image: url('/donna-hero-mockup4.jpg');
+  z-index: 0;
   background-repeat: no-repeat;
-  background-position: 72% center;
   background-size: cover;
   transform: scale(1.01);
 }
 
-.hero-photo-section::after {
-  content: "";
+.hero-photo-gradient {
   position: absolute;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
+  opacity: var(--hero-fade-strength, 1);
   background: linear-gradient(
     90deg,
-    #f5f1e8 0%,
-    #f5f1e8 52%,
-    rgba(245, 241, 232, 0.98) 56%,
-    rgba(245, 241, 232, 0.90) 60%,
-    rgba(245, 241, 232, 0.68) 64%,
-    rgba(245, 241, 232, 0.40) 68%,
-    rgba(245, 241, 232, 0.16) 72%,
-    rgba(245, 241, 232, 0) 78%
+    var(--hero-background, var(--cream)) 0%,
+    var(--hero-background, var(--cream)) 50%,
+    color-mix(in srgb, var(--hero-background, var(--cream)) 98%, transparent) 55%,
+    color-mix(in srgb, var(--hero-background, var(--cream)) 90%, transparent) 60%,
+    color-mix(in srgb, var(--hero-background, var(--cream)) 68%, transparent) 65%,
+    color-mix(in srgb, var(--hero-background, var(--cream)) 42%, transparent) 70%,
+    color-mix(in srgb, var(--hero-background, var(--cream)) 16%, transparent) 75%,
+    transparent 82%
   );
 }
 
@@ -63,35 +62,23 @@
   font-size: clamp(1rem, 1.3vw, 1.18rem);
 }
 
-@media (min-width: 1180px) {
-  .hero-photo-section::before {
-    background-size: auto 118%;
-    background-position: calc(50% + 300px) center;
-  }
-}
-
 @media (max-width: 850px) {
-  .hero-photo-section {
+  .hero-photo-section,
+  .hero-wide {
     min-height: 500px;
   }
 
-  .hero-photo-section::before {
-    background-position: 63% center;
-  }
-
-  .hero-photo-section::after {
-    background:
-      linear-gradient(
-        90deg,
-        rgba(245, 241, 232, 0.98) 0%,
-        rgba(245, 241, 232, 0.92) 42%,
-        rgba(245, 241, 232, 0.53) 67%,
-        rgba(245, 241, 232, 0.18) 100%
-      );
+  .hero-photo-gradient {
+    background: linear-gradient(
+      90deg,
+      var(--hero-background, var(--cream)) 0%,
+      color-mix(in srgb, var(--hero-background, var(--cream)) 94%, transparent) 40%,
+      color-mix(in srgb, var(--hero-background, var(--cream)) 58%, transparent) 68%,
+      color-mix(in srgb, var(--hero-background, var(--cream)) 18%, transparent) 100%
+    );
   }
 
   .hero-wide {
-    min-height: 500px;
     padding-top: 42px;
     padding-bottom: 42px;
   }
@@ -112,22 +99,21 @@
     align-items: flex-end;
   }
 
-  .hero-photo-section::before {
-    background-size: auto 54%;
-    background-position: center top;
-    background-color: #e2e0d7;
+  .hero-photo-media {
+    inset: 0 0 auto;
+    height: 56%;
+    background-size: cover;
   }
 
-  .hero-photo-section::after {
-    background:
-      linear-gradient(
-        180deg,
-        rgba(245, 241, 232, 0.02) 0%,
-        rgba(245, 241, 232, 0.10) 31%,
-        rgba(245, 241, 232, 0.94) 49%,
-        rgba(245, 241, 232, 1) 64%,
-        rgba(245, 241, 232, 1) 100%
-      );
+  .hero-photo-gradient {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      color-mix(in srgb, var(--hero-background, var(--cream)) 10%, transparent) 28%,
+      color-mix(in srgb, var(--hero-background, var(--cream)) 78%, transparent) 46%,
+      var(--hero-background, var(--cream)) 62%,
+      var(--hero-background, var(--cream)) 100%
+    );
   }
 
   .hero-wide {
