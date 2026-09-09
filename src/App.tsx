@@ -4,6 +4,7 @@ import { SiteLayout } from './components/SiteLayout'
 import { supabase } from './lib/supabase'
 import { Admin } from './pages/Admin'
 import { Book } from './pages/Book'
+import { ClientIdUpload } from './pages/ClientIdUpload'
 import { Contact } from './pages/Contact'
 import { Home } from './pages/Home'
 import { LegalPage } from './pages/LegalPage'
@@ -76,6 +77,7 @@ function App() {
           <Route path="contact" element={<Contact />} />
           <Route path="privacy" element={<LegalPage type="privacy" />} />
           <Route path="terms" element={<LegalPage type="terms" />} />
+          <Route path="client-id/:token" element={<ClientIdUpload />} />
         </Route>
 
         <Route path="admin" element={<Admin />}>
