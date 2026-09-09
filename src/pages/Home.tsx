@@ -2,6 +2,7 @@ import { ArrowRight, CalendarDays, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { siteConfig } from '../config/site'
 import { useSeo } from '../lib/seo'
+import '../hero.css'
 
 export function Home() {
   useSeo({
@@ -30,11 +31,21 @@ export function Home() {
             </div>
           </div>
 
-          <aside className="hero-panel" aria-label="Consultation details">
-            <CalendarDays size={30} />
-            <h2>60 minute consultations</h2>
-            <p>{siteConfig.bookingHours}</p>
-            <p>Friday by arrangement</p>
+          <aside className="hero-portrait" aria-label="Donna Pokere Phillips consultation details">
+            <img
+              src="/donna-hero-mockup4.jpg"
+              alt="Donna Pokere Phillips"
+              loading="eager"
+              fetchPriority="high"
+            />
+            <div className="hero-portrait-caption">
+              <CalendarDays size={24} aria-hidden="true" />
+              <div>
+                <strong>60 minute consultations</strong>
+                <span>{siteConfig.bookingHours}</span>
+                <span>Friday by arrangement</span>
+              </div>
+            </div>
           </aside>
         </div>
       </section>
