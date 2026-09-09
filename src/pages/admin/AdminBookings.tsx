@@ -170,7 +170,7 @@ export function AdminBookings() {
       }
 
       let clientId = matches[0]?.id
-      let existingName = matches[0]?.full_name
+      const existingName = matches[0]?.full_name
       let issueId: string | null = null
       let matterLabel = ''
 
