@@ -26,13 +26,15 @@ export function Contact() {
 
     try {
       setSubmitting(true)
-      await submitContact({
+      const result = await submitContact({
         name: String(data.get('name') ?? ''),
         email: String(data.get('email') ?? ''),
         phone: String(data.get('phone') ?? ''),
         message: String(data.get('message') ?? ''),
       })
-      setSuccess('Thanks, your message has been received. Donna will be notified.')
+      setSuccess(result.emailSent
+        ? 'Thanks, your message has been received. Donna has been notified and a confirmation email has been sent to you.'
+        : 'Thanks, your message has been received and Donna has been notified. The confirmation email could not be confirmed, but your enquiry is safely recorded.')
       form.reset()
     } catch {
       setError('We could not send your message. Please check the details and try again.')
