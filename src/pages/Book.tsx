@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { siteConfig } from '../config/site'
 import {
   formatNzTime,
@@ -63,6 +64,11 @@ const statusLabel: Record<DayStatus, string> = {
 }
 
 export function Book() {
+  const [searchParams] = useSearchParams()
+  const requestedService = searchParams.get('service') ?? ''
+  const preselectedService = siteConfig.services.includes(requestedService as (typeof siteConfig.services)[number])
+    ? requestedService
+    : ''
   const today = nzDateString()
   const [windowStart, setWindowStart] = useState(today)
   const [availability, setAvailability] = useState<Record<string, AvailableSlot[]>>({})
@@ -165,7 +171,7 @@ export function Book() {
 
     try {
       setSubmitting(true)
-      await submitBooking({
+      const result = await submitBooking({
         fullName: String(data.get('name') ?? ''),
         email: String(data.get('email') ?? ''),
         phone: String(data.get('phone') ?? ''),
@@ -177,7 +183,9 @@ export function Book() {
         privacyConsent: data.get('privacyConsent') === 'on',
       })
 
-      setSuccess('Your consultation request has been received. Donna will be notified and the selected time is now held for you.')
+      setSuccess(result.emailSent
+        ? 'Your consultation request has been received and the selected time is now held for you. A confirmation email has been sent and Donna has been notified.'
+        : 'Your consultation request has been received and the selected time is now held for you. Donna has been notified, but the confirmation email could not be confirmed, so please keep a note of your selected time.')
       form.reset()
       setDate('')
       setSlots([])
@@ -256,7 +264,7 @@ export function Book() {
 
           <label>
             Service
-            <select name="service" defaultValue="" required>
+            <select name="service" defaultValue={preselectedService} required>
               <option value="" disabled>Select a service</option>
               {siteConfig.services.map((service) => (
                 <option key={service} value={service}>{service}</option>
@@ -280,12 +288,7 @@ export function Book() {
                 <strong>{rangeLabel}</strong>
               </div>
               <div className="calendar-controls">
-                <button
-                  type="button"
-                  aria-label="Previous week"
-                  onClick={goBackOneWeek}
-                  disabled={windowStart === today}
-                >
+                <button type="button" aria-label="Previous week" onClick={goBackOneWeek} disabled={windowStart === today}>
                   <ChevronLeft size={18} />
                 </button>
                 <button type="button" aria-label="Next week" onClick={goForwardOneWeek}>
@@ -310,13 +313,7 @@ export function Book() {
                 const selected = date === calendarDate
 
                 return (
-                  <button
-                    key={calendarDate}
-                    className={`availability-day ${status}${selected ? ' selected' : ''}`}
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => void handleDateChange(calendarDate)}
-                  >
+                  <button key={calendarDate} className={`availability-day ${status}${selected ? ' selected' : ''}`} type="button" disabled={disabled} onClick={() => void handleDateChange(calendarDate)}>
                     <span className="availability-weekday">{display.weekday}</span>
                     <strong>{display.day}</strong>
                     <span className="availability-month">{display.month}</span>
@@ -335,23 +332,12 @@ export function Book() {
           <fieldset className="slot-fieldset">
             <legend>{date ? `Available times for ${formatCalendarDay(date).weekday} ${formatCalendarDay(date).day} ${formatCalendarDay(date).month}` : 'Available times'}</legend>
             {!date && <p className="slot-help">Choose a day marked Free or Limited above.</p>}
-            {loadingSlots && (
-              <div className="slot-loading">
-                <LoaderCircle className="spin" size={18} /> Loading available times
-              </div>
-            )}
-            {date && !loadingSlots && slots.length === 0 && (
-              <p className="slot-help">That day is now fully booked. Choose another available day.</p>
-            )}
+            {loadingSlots && <div className="slot-loading"><LoaderCircle className="spin" size={18} /> Loading available times</div>}
+            {date && !loadingSlots && slots.length === 0 && <p className="slot-help">That day is now fully booked. Choose another available day.</p>}
             {slots.length > 0 && (
               <div className="slot-grid">
                 {slots.map((slot) => (
-                  <button
-                    key={slot.start_at}
-                    className={selectedStartAt === slot.start_at ? 'slot-button selected' : 'slot-button'}
-                    type="button"
-                    onClick={() => setSelectedStartAt(slot.start_at)}
-                  >
+                  <button key={slot.start_at} className={selectedStartAt === slot.start_at ? 'slot-button selected' : 'slot-button'} type="button" onClick={() => setSelectedStartAt(slot.start_at)}>
                     <span>{formatNzTime(slot.start_at)}</span>
                     <small>Free</small>
                   </button>
