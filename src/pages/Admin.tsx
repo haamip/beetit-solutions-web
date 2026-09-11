@@ -37,12 +37,17 @@ const adminNav = [
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
+const LOGIN_COOLDOWN_SECONDS = 60
+const LOGIN_COOLDOWN_STORAGE_KEY = 'beetit_admin_magic_link_next_at'
+
 export function Admin() {
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [profile, setProfile] = useState<AdminProfile | null>(null)
   const [loginEmail, setLoginEmail] = useState('haami@haktindustries.co.nz')
   const [loginSent, setLoginSent] = useState(false)
   const [loginError, setLoginError] = useState('')
+  const [loginSending, setLoginSending] = useState(false)
+  const [loginCooldown, setLoginCooldown] = useState(0)
   const [navOpen, setNavOpen] = useState(false)
 
   useSeo({
@@ -100,8 +105,38 @@ export function Admin() {
     return () => listener.subscription.unsubscribe()
   }, [checkAdmin])
 
+  useEffect(() => {
+    const nextAllowedAt = Number(window.localStorage.getItem(LOGIN_COOLDOWN_STORAGE_KEY) ?? '0')
+    const secondsRemaining = Math.ceil((nextAllowedAt - Date.now()) / 1000)
+
+    if (secondsRemaining > 0) {
+      setLoginCooldown(secondsRemaining)
+    } else {
+      window.localStorage.removeItem(LOGIN_COOLDOWN_STORAGE_KEY)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (loginCooldown <= 0) return
+
+    const timer = window.setTimeout(() => {
+      setLoginCooldown((seconds) => {
+        const nextSeconds = Math.max(0, seconds - 1)
+        if (nextSeconds === 0) {
+          window.localStorage.removeItem(LOGIN_COOLDOWN_STORAGE_KEY)
+        }
+        return nextSeconds
+      })
+    }, 1000)
+
+    return () => window.clearTimeout(timer)
+  }, [loginCooldown])
+
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    if (loginSending || loginCooldown > 0) return
+
     setLoginError('')
     setLoginSent(false)
 
@@ -118,6 +153,7 @@ export function Admin() {
       return
     }
 
+    setLoginSending(true)
     window.localStorage.setItem('beetit_admin_login_pending', '1')
 
     const { error } = await supabase.auth.signInWithOtp({
@@ -129,12 +165,23 @@ export function Admin() {
       },
     })
 
+    setLoginSending(false)
+
     if (error) {
       window.localStorage.removeItem('beetit_admin_login_pending')
-      setLoginError(error.message)
+      const message = error.message.toLowerCase()
+
+      if (message.includes('rate limit') || message.includes('too many')) {
+        setLoginError('We could not send another sign in email yet. Please wait a moment and try again.')
+      } else {
+        setLoginError('We could not send the sign in email. Please try again shortly.')
+      }
       return
     }
 
+    const nextAllowedAt = Date.now() + LOGIN_COOLDOWN_SECONDS * 1000
+    window.localStorage.setItem(LOGIN_COOLDOWN_STORAGE_KEY, String(nextAllowedAt))
+    setLoginCooldown(LOGIN_COOLDOWN_SECONDS)
     setLoginEmail(normalizedEmail)
     setLoginSent(true)
   }
@@ -184,8 +231,16 @@ export function Admin() {
           )}
           {loginError && <div className="form-status error" role="alert">{loginError}</div>}
 
-          <button className="button primary full-width" type="submit">
-            Email secure sign in link
+          <button
+            className="button primary full-width"
+            type="submit"
+            disabled={loginSending || loginCooldown > 0}
+          >
+            {loginSending
+              ? 'Sending secure sign in link…'
+              : loginCooldown > 0
+                ? `Link sent. Try again in ${loginCooldown}s`
+                : 'Email secure sign in link'}
           </button>
         </form>
       </section>
