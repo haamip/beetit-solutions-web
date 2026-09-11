@@ -40,6 +40,13 @@ const adminNav = [
 const LOGIN_COOLDOWN_SECONDS = 60
 const LOGIN_COOLDOWN_STORAGE_KEY = 'beetit_admin_magic_link_next_at'
 
+function getInitialLoginCooldown() {
+  if (typeof window === 'undefined') return 0
+
+  const nextAllowedAt = Number(window.localStorage.getItem(LOGIN_COOLDOWN_STORAGE_KEY) ?? '0')
+  return Math.max(0, Math.ceil((nextAllowedAt - Date.now()) / 1000))
+}
+
 export function Admin() {
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [profile, setProfile] = useState<AdminProfile | null>(null)
@@ -47,7 +54,7 @@ export function Admin() {
   const [loginSent, setLoginSent] = useState(false)
   const [loginError, setLoginError] = useState('')
   const [loginSending, setLoginSending] = useState(false)
-  const [loginCooldown, setLoginCooldown] = useState(0)
+  const [loginCooldown, setLoginCooldown] = useState(getInitialLoginCooldown)
   const [navOpen, setNavOpen] = useState(false)
 
   useSeo({
@@ -104,17 +111,6 @@ export function Admin() {
 
     return () => listener.subscription.unsubscribe()
   }, [checkAdmin])
-
-  useEffect(() => {
-    const nextAllowedAt = Number(window.localStorage.getItem(LOGIN_COOLDOWN_STORAGE_KEY) ?? '0')
-    const secondsRemaining = Math.ceil((nextAllowedAt - Date.now()) / 1000)
-
-    if (secondsRemaining > 0) {
-      setLoginCooldown(secondsRemaining)
-    } else {
-      window.localStorage.removeItem(LOGIN_COOLDOWN_STORAGE_KEY)
-    }
-  }, [])
 
   useEffect(() => {
     if (loginCooldown <= 0) return
