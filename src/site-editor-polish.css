@@ -1,5 +1,14 @@
 /* Keep the admin hero preview aligned with the live homepage treatment. */
 
+/* The Settings screen is intentionally client-facing. HAKT infrastructure stays hidden. */
+.settings-grid-top {
+  grid-template-columns: minmax(0, 720px);
+}
+
+.settings-grid-top > section:nth-child(2) {
+  display: none;
+}
+
 .hero-treatment-section .settings-form {
   gap: 16px;
 }
@@ -63,6 +72,10 @@
 }
 
 @media (max-width: 620px) {
+  .settings-grid-top {
+    grid-template-columns: 1fr;
+  }
+
   .settings-hero-preview {
     min-height: 430px;
   }
