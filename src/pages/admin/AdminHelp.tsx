@@ -27,6 +27,16 @@ const helpArticles = [
     body: 'Open the client and use New matter. Every matter receives a MAT number. Use the matter filters to view only the notes, documents and bookings linked to that issue.',
   },
   {
+    title: 'Edit a client record',
+    keywords: 'edit client name email phone service date details',
+    body: 'Open the client record and choose Edit client. Update the details that have changed and save. Editing the client does not remove their existing MAT files, notes, documents or booking history.',
+  },
+  {
+    title: 'Delete a client safely',
+    keywords: 'delete client permanent files identity documents remove',
+    body: 'Use Delete client only when the entire client record genuinely needs to be permanently removed. Beet It requires the client name, the word DELETE and a final confirmation. Client files in secure storage are removed as part of the deletion. This cannot be undone.',
+  },
+  {
     title: 'File a private note under the right matter',
     keywords: 'notes private issue matter file internal',
     body: 'Open the client, select the matter you are working on, then add the note. The File note under selector decides which MAT file the note belongs to.',
@@ -47,6 +57,11 @@ const helpArticles = [
     body: 'Use Link client and matter on the booking. The system checks for an existing person. If they already have an open matter for the same workflow you can reuse it or create a new MAT file.',
   },
   {
+    title: 'Understand live booking availability',
+    keywords: 'booking availability free limited full closed retry calendar slots',
+    body: 'Free means several times are available, Limited means only a few remain, Full means the live system returned no available times, and Closed means online booking is not offered that day. Retry means the availability check could not be completed, so select the day again to recheck rather than assuming it is full.',
+  },
+  {
     title: 'Convert an enquiry into client work',
     keywords: 'enquiry workflow client matter convert',
     body: 'Choose the likely workflow on the enquiry, then Link client and matter. Existing client details are checked before anything new is created.',
@@ -58,8 +73,13 @@ const helpArticles = [
   },
   {
     title: 'Change the website look',
-    keywords: 'settings colours hero image website design theme',
-    body: 'Open Settings to change approved brand colours, public contact details and the homepage hero. Uploaded hero photos are automatically cropped and blended by the website design system.',
+    keywords: 'settings colours hero image website design theme size fade focus height',
+    body: 'Open Settings to change approved brand colours, public contact details and the homepage hero. Uploaded hero photos are automatically cropped and blended. Use Photo focus, Photo size, Hero height and Fade strength to tune the image without editing it externally.',
+  },
+  {
+    title: 'Ask HAKT for support',
+    keywords: 'help support ticket urgent priority hakt problem issue',
+    body: 'Open Help and create a support request. Include what you were doing, what you expected and what happened instead. Use Urgent only when the issue is stopping normal use. The ticket number lets the request be tracked through to resolution.',
   },
 ]
 
