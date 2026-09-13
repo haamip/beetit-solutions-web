@@ -71,20 +71,23 @@
   margin-bottom: 0;
 }
 
-.hero-upload-form {
+.hero-upload-panel .hero-upload-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(260px, 560px) auto;
+  justify-content: start;
   align-items: center;
   gap: 12px;
+  margin-top: 0;
 }
 
-.hero-upload-form input[type="file"] {
+.hero-upload-panel .hero-upload-form input[type="file"] {
   width: 100%;
   min-width: 0;
+  max-width: none;
   padding: 10px 12px;
 }
 
-.hero-upload-form .button {
+.hero-upload-panel .hero-upload-form .button {
   white-space: nowrap;
 }
 
@@ -137,11 +140,11 @@
     gap: 16px;
   }
 
-  .hero-upload-form {
+  .hero-upload-panel .hero-upload-form {
     grid-template-columns: 1fr;
   }
 
-  .hero-upload-form .button {
+  .hero-upload-panel .hero-upload-form .button {
     width: 100%;
   }
 }
