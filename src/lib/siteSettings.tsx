@@ -20,6 +20,19 @@ export type SiteSettings = {
   publicEmail: string
   publicPhone: string
   publicLocation: string
+  heroPrimaryButton: string
+  heroSecondaryButton: string
+  aboutEyebrow: string
+  aboutTitle: string
+  aboutBodyOne: string
+  aboutBodyTwo: string
+  servicesEyebrow: string
+  servicesTitle: string
+  servicesLink: string
+  ctaEyebrow: string
+  ctaTitle: string
+  ctaBody: string
+  ctaButton: string
 }
 
 export const defaultSiteSettings: SiteSettings = {
@@ -38,6 +51,19 @@ export const defaultSiteSettings: SiteSettings = {
   publicEmail: siteConfig.email,
   publicPhone: siteConfig.phone,
   publicLocation: siteConfig.location,
+  heroPrimaryButton: 'Book a consultation',
+  heroSecondaryButton: 'View services',
+  aboutEyebrow: 'About Donna',
+  aboutTitle: 'Experience, clarity and a practical way forward.',
+  aboutBodyOne: 'Donna holds an LLB, LLM (Hons) and BA, with more than 20 years of experience across governance, policy, advocacy and advisory work.',
+  aboutBodyTwo: 'Her approach is practical, respectful and culturally grounded, with a focus on helping people understand their options and move forward with confidence.',
+  servicesEyebrow: 'Services',
+  servicesTitle: 'Support across a range of matters.',
+  servicesLink: 'View all services',
+  ctaEyebrow: 'Ready to talk?',
+  ctaTitle: 'Start with a consultation.',
+  ctaBody: 'Tell Donna what you need help with and choose a suitable consultation time.',
+  ctaButton: 'Book now',
 }
 
 const SiteSettingsContext = createContext<SiteSettings>(defaultSiteSettings)
@@ -54,7 +80,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     if (!supabase) return
     const { data } = await supabase
       .from('site_settings')
-      .select('primary_color, background_color, accent_color, hero_image_path, hero_position, hero_overlay_strength, hero_image_scale, hero_height, hero_eyebrow, hero_title, hero_lead, public_email, public_phone, public_location')
+      .select('primary_color, background_color, accent_color, hero_image_path, hero_position, hero_overlay_strength, hero_image_scale, hero_height, hero_eyebrow, hero_title, hero_lead, public_email, public_phone, public_location, hero_primary_button, hero_secondary_button, about_eyebrow, about_title, about_body_one, about_body_two, services_eyebrow, services_title, services_link, cta_eyebrow, cta_title, cta_body, cta_button')
       .eq('id', 1)
       .maybeSingle()
 
@@ -75,6 +101,19 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
       publicEmail: data.public_email || defaultSiteSettings.publicEmail,
       publicPhone: data.public_phone || defaultSiteSettings.publicPhone,
       publicLocation: data.public_location || defaultSiteSettings.publicLocation,
+      heroPrimaryButton: data.hero_primary_button || defaultSiteSettings.heroPrimaryButton,
+      heroSecondaryButton: data.hero_secondary_button || defaultSiteSettings.heroSecondaryButton,
+      aboutEyebrow: data.about_eyebrow || defaultSiteSettings.aboutEyebrow,
+      aboutTitle: data.about_title || defaultSiteSettings.aboutTitle,
+      aboutBodyOne: data.about_body_one || defaultSiteSettings.aboutBodyOne,
+      aboutBodyTwo: data.about_body_two || defaultSiteSettings.aboutBodyTwo,
+      servicesEyebrow: data.services_eyebrow || defaultSiteSettings.servicesEyebrow,
+      servicesTitle: data.services_title || defaultSiteSettings.servicesTitle,
+      servicesLink: data.services_link || defaultSiteSettings.servicesLink,
+      ctaEyebrow: data.cta_eyebrow || defaultSiteSettings.ctaEyebrow,
+      ctaTitle: data.cta_title || defaultSiteSettings.ctaTitle,
+      ctaBody: data.cta_body || defaultSiteSettings.ctaBody,
+      ctaButton: data.cta_button || defaultSiteSettings.ctaButton,
     })
   }, [])
 
