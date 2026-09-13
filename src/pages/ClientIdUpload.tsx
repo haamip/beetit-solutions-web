@@ -34,7 +34,7 @@ export function ClientIdUpload() {
 
       if (invokeError || !data?.valid) {
         setValid(false)
-        setError('This secure upload link is invalid, expired or has already been used. Please contact Beet It Solutions for a new link.')
+        setError('This secure upload link is invalid, expired or has already been used. Please contact DPP Legal Solutions for a new link.')
       } else {
         setValid(true)
         setClientName(data.clientName ?? '')
@@ -75,7 +75,7 @@ export function ClientIdUpload() {
     const { error: uploadError } = await supabase.functions.invoke('client-id-upload', { body })
 
     if (uploadError) {
-      setError('The ID document could not be uploaded. Check the file type and try again, or ask Beet It Solutions for a new link.')
+      setError('The ID document could not be uploaded. Check the file type and try again, or ask DPP Legal Solutions for a new link.')
     } else {
       setUploaded(true)
       setValid(false)
@@ -95,13 +95,13 @@ export function ClientIdUpload() {
             <CheckCircle2 size={34} />
             <p className="eyebrow">Upload complete</p>
             <h1>Thank you.</h1>
-            <p>Your ID document has been securely received by Beet It Solutions for identity verification.</p>
+            <p>Your ID document has been securely received by DPP Legal Solutions for identity verification.</p>
           </div>
         ) : valid ? (
           <>
             <p className="eyebrow">Secure identity check</p>
             <h1>Upload your ID</h1>
-            <p>{clientName ? `Kia ora ${clientName}. ` : ''}Please upload a clear photo or PDF of an accepted identity document so Beet It Solutions can verify your details.</p>
+            <p>{clientName ? `Kia ora ${clientName}. ` : ''}Please upload a clear photo or PDF of an accepted identity document so DPP Legal Solutions can verify your details.</p>
 
             {error && <div className="form-status error">{error}</div>}
 
@@ -122,7 +122,7 @@ export function ClientIdUpload() {
 
             <div className="client-id-security-note">
               <ShieldCheck size={20} />
-              <span>This link can only be used once. Your ID is stored in private secure storage and is only available to authorised Beet It Solutions administrators.</span>
+              <span>This link can only be used once. Your ID is stored in private secure storage and is only available to authorised DPP Legal Solutions administrators.</span>
             </div>
           </>
         ) : (
