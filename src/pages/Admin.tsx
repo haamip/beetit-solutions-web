@@ -156,7 +156,9 @@ export function Admin() {
       email: normalizedEmail,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${window.location.origin}/admin`,
+        emailRedirectTo: window.location.hostname === 'localhost'
+          ? `${window.location.origin}/admin`
+          : 'https://www.dpplegalsolutions.co.nz/admin',
         data: { full_name: fullName },
       },
     })
