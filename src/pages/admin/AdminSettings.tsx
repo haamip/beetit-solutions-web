@@ -1,4 +1,4 @@
-import { ImagePlus, Mail, Palette, RefreshCcw, Save, Settings, ShieldCheck } from 'lucide-react'
+import { ImagePlus, RefreshCcw, Save } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import { siteConfig } from '../../config/site'
@@ -77,6 +77,7 @@ export function AdminSettings() {
   const [site, setSite] = useState<SiteDraft>(defaultDraft)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [uploadingHero, setUploadingHero] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -146,30 +147,6 @@ export function AdminSettings() {
 
   function broadcastSettingsUpdate() {
     window.dispatchEvent(new Event('beetit-site-settings-updated'))
-  }
-
-  async function saveProfile(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!supabase || !profile) return
-    const data = new FormData(event.currentTarget)
-    const fullName = String(data.get('fullName') ?? '').trim()
-    if (!fullName) return
-
-    setSaving(true)
-    setError('')
-    setNotice('')
-    const { data: updated, error: updateError } = await supabase
-      .from('admin_users')
-      .update({ full_name: fullName })
-      .eq('id', profile.id)
-      .select('id, email, full_name')
-      .single()
-    if (updateError || !updated) setError('Your admin name could not be saved.')
-    else {
-      setProfile(updated as Profile)
-      setNotice('Admin profile updated.')
-    }
-    setSaving(false)
   }
 
   async function saveWebsiteSettings(event: FormEvent<HTMLFormElement>) {
@@ -249,7 +226,8 @@ export function AdminSettings() {
       document.documentElement.style.setProperty('--cream', next.backgroundColor)
       document.documentElement.style.setProperty('--warm', next.accentColor)
       broadcastSettingsUpdate()
-      setNotice('Website settings saved and published.')
+      setHasUnsavedChanges(false)
+      setNotice('Website changes saved and published.')
     }
     setSaving(false)
   }
@@ -309,7 +287,7 @@ export function AdminSettings() {
 
   async function resetWebsiteStyle() {
     if (!supabase || !profile) return
-    if (!window.confirm('Reset colours, hero wording and hero sizing to the Beet It design defaults? The current uploaded photo will stay in place.')) return
+    if (!window.confirm('Reset colours, wording and main photo settings to the DPP Legal Solutions defaults? The current uploaded photo will stay in place.')) return
 
     setSaving(true)
     const next = { ...defaultDraft, heroImagePath: site.heroImagePath }
@@ -349,7 +327,8 @@ export function AdminSettings() {
     else {
       setSite(next)
       broadcastSettingsUpdate()
-      setNotice('Beet It website defaults restored.')
+      setHasUnsavedChanges(false)
+      setNotice('DPP Legal Solutions website defaults restored.')
     }
     setSaving(false)
   }
@@ -375,64 +354,36 @@ export function AdminSettings() {
       {error && <div className="form-status error">{error}</div>}
       {notice && <div className="form-status success">{notice}</div>}
 
-      <div className="settings-grid settings-grid-top">
-        <section className="dashboard-panel">
-          <div className="dashboard-panel-heading">
-            <div>
-              <p className="eyebrow">Your account</p>
-              <h2>Admin profile</h2>
-            </div>
-            <ShieldCheck size={21} />
-          </div>
-
-          {profile ? (
-            <form className="settings-form" onSubmit={saveProfile}>
-              <label>
-                Display name
-                <input name="fullName" defaultValue={profile.full_name ?? ''} required />
-              </label>
-              <label>
-                Sign in email
-                <input value={profile.email} readOnly />
-                <span className="field-help">Admin email changes stay protected so access cannot be changed accidentally.</span>
-              </label>
-              <button className="button primary" type="submit" disabled={saving}><Save size={17} /> {saving ? 'Saving…' : 'Save profile'}</button>
-            </form>
-          ) : <p>Admin profile unavailable.</p>}
-        </section>
-
-        <section className="dashboard-panel">
-          <div className="dashboard-panel-heading">
-            <div>
-              <p className="eyebrow">Infrastructure</p>
-              <h2>Platform details</h2>
-            </div>
-            <Mail size={21} />
-          </div>
-          <div className="settings-summary-list">
-            <div><span>Booking hours</span><strong>{siteConfig.bookingHours}</strong></div>
-            <div><span>Booking length</span><strong>{siteConfig.bookingLength}</strong></div>
-            <div><span>Transactional sender</span><strong>Beet It Solutions via haktindustries.co.nz</strong></div>
-            <div><span>Email delivery</span><strong>Resend connected</strong></div>
-            <div><span>Client documents</span><strong>Private Supabase storage</strong></div>
-            <div><span>Website images</span><strong>Managed site assets</strong></div>
-          </div>
-        </section>
-      </div>
-
-      <form className="dashboard-panel website-editor" onSubmit={saveWebsiteSettings}>
+      <section className="dashboard-panel hero-upload-panel">
         <div className="dashboard-panel-heading">
           <div>
-            <p className="eyebrow">Website editor</p>
-            <h2>Brand, hero and public details</h2>
-            <p>These are the controls Donna can safely change without touching code.</p>
+            <p className="eyebrow">Main photo</p>
+            <h2>Change the homepage photo</h2>
+            <p>Choose a new photo here. You can adjust how it looks in Main photo settings below.</p>
           </div>
-          <Palette size={22} />
+          <ImagePlus size={22} />
+        </div>
+        <form className="hero-upload-form" onSubmit={uploadHero}>
+          <input name="heroImage" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required />
+          <button className="button primary" type="submit" disabled={uploadingHero}>{uploadingHero ? 'Uploading…' : 'Upload and publish hero photo'}</button>
+        </form>
+      </section>
+
+      <form className="dashboard-panel website-editor" onSubmit={saveWebsiteSettings} onChange={() => setHasUnsavedChanges(true)}>
+        <div className="dashboard-panel-heading">
+          <div>
+            <p className="eyebrow">Website</p>
+            <h2>Change the public website</h2>
+            <p>Open one section at a time, make the change, then press Save and publish.</p>
+          </div>
+          <a className="button secondary admin-view-public" href="/" target="_blank" rel="noreferrer">View website</a>
         </div>
 
         <div className="website-editor-grid">
-          <section className="website-editor-section">
-            <h3>Brand colours</h3>
+          <details className="website-editor-section editor-accordion">
+            <summary>
+              <span><strong>Advanced design settings</strong><small>Change the website colours. Most people can leave these alone.</small></span>
+            </summary>
             <p>Only the core palette changes. Buttons, headings and backgrounds update automatically.</p>
             <div className="colour-control-grid">
               <label>
@@ -448,19 +399,23 @@ export function AdminSettings() {
                 <span className="colour-input-row"><input name="accentColor" type="color" value={site.accentColor} onChange={(event) => setSite((current) => ({ ...current, accentColor: event.target.value }))} /><code>{site.accentColor}</code></span>
               </label>
             </div>
-          </section>
+          </details>
 
-          <section className="website-editor-section">
-            <h3>Hero wording</h3>
+          <details className="website-editor-section editor-accordion" open>
+            <summary>
+              <span><strong>Top of the home page</strong><small>Change the main heading and introduction visitors see first.</small></span>
+            </summary>
             <div className="settings-form">
               <label>Small heading<input name="heroEyebrow" value={site.heroEyebrow} onChange={(event) => setSite((current) => ({ ...current, heroEyebrow: event.target.value }))} required /></label>
               <label>Main heading<textarea name="heroTitle" rows={2} value={site.heroTitle} onChange={(event) => setSite((current) => ({ ...current, heroTitle: event.target.value }))} required /></label>
               <label>Intro text<textarea name="heroLead" rows={3} value={site.heroLead} onChange={(event) => setSite((current) => ({ ...current, heroLead: event.target.value }))} required /></label>
             </div>
-          </section>
+          </details>
 
-          <section className="website-editor-section website-copy-section">
-            <h3>Home page wording</h3>
+          <details className="website-editor-section website-copy-section editor-accordion">
+            <summary>
+              <span><strong>Rest of the home page</strong><small>Change the About, Services and closing sections.</small></span>
+            </summary>
             <p>Edit the public wording while the layout and links stay protected.</p>
             <div className="settings-form">
               <label>Hero main button<input name="heroPrimaryButton" value={site.heroPrimaryButton} onChange={(event) => setSite((current) => ({ ...current, heroPrimaryButton: event.target.value }))} required /></label>
@@ -477,10 +432,12 @@ export function AdminSettings() {
               <label>Call to action text<textarea name="ctaBody" rows={3} value={site.ctaBody} onChange={(event) => setSite((current) => ({ ...current, ctaBody: event.target.value }))} required /></label>
               <label>Call to action button<input name="ctaButton" value={site.ctaButton} onChange={(event) => setSite((current) => ({ ...current, ctaButton: event.target.value }))} required /></label>
             </div>
-          </section>
+          </details>
 
-          <section className="website-editor-section hero-treatment-section">
-            <h3>Hero photo treatment</h3>
+          <details className="website-editor-section hero-treatment-section editor-accordion">
+            <summary>
+              <span><strong>Main photo settings</strong><small>Adjust the position, size, height and fade of the homepage photo.</small></span>
+            </summary>
             <p>Upload the normal photo, then resize and reposition it here. Beet It keeps the crop and gradient treatment consistent.</p>
             <div className="settings-form">
               <label>
@@ -509,16 +466,18 @@ export function AdminSettings() {
                 <input name="heroOverlayStrength" type="range" min="0.45" max="1" step="0.05" value={Math.min(site.heroOverlayStrength, 1)} onChange={(event) => setSite((current) => ({ ...current, heroOverlayStrength: Number(event.target.value) }))} />
               </label>
             </div>
-          </section>
+          </details>
 
-          <section className="website-editor-section">
-            <h3>Public contact details</h3>
+          <details className="website-editor-section editor-accordion">
+            <summary>
+              <span><strong>Contact details</strong><small>Change the public email, phone number and location.</small></span>
+            </summary>
             <div className="settings-form">
               <label>Email<input name="publicEmail" type="email" value={site.publicEmail} onChange={(event) => setSite((current) => ({ ...current, publicEmail: event.target.value }))} required /></label>
               <label>Phone<input name="publicPhone" value={site.publicPhone} onChange={(event) => setSite((current) => ({ ...current, publicPhone: event.target.value }))} required /></label>
               <label>Location<input name="publicLocation" value={site.publicLocation} onChange={(event) => setSite((current) => ({ ...current, publicLocation: event.target.value }))} required /></label>
             </div>
-          </section>
+          </details>
         </div>
 
         <div className="settings-hero-preview" style={previewStyle}>
@@ -539,25 +498,14 @@ export function AdminSettings() {
         </div>
 
         <div className="website-editor-actions">
-          <button className="button secondary" type="button" onClick={() => void resetWebsiteStyle()} disabled={saving}><RefreshCcw size={16} /> Restore Beet It defaults</button>
-          <button className="button primary" type="submit" disabled={saving}><Save size={17} /> {saving ? 'Publishing…' : 'Save and publish website settings'}</button>
+          <span className={hasUnsavedChanges ? 'editor-save-status unsaved' : 'editor-save-status'}>
+            {hasUnsavedChanges ? 'Unsaved changes' : 'Everything is saved'}
+          </span>
+          <button className="button secondary" type="button" onClick={() => void resetWebsiteStyle()} disabled={saving}><RefreshCcw size={16} /> Restore defaults</button>
+          <button className="button primary" type="submit" disabled={saving || !hasUnsavedChanges}><Save size={17} /> {saving ? 'Publishing…' : 'Save and publish'}</button>
         </div>
       </form>
 
-      <section className="dashboard-panel hero-upload-panel">
-        <div className="dashboard-panel-heading">
-          <div>
-            <p className="eyebrow">Hero image</p>
-            <h2>Replace homepage photo</h2>
-            <p>Upload the normal photo. Then use the preview above to size, position and fade it before saving.</p>
-          </div>
-          <ImagePlus size={22} />
-        </div>
-        <form className="hero-upload-form" onSubmit={uploadHero}>
-          <input name="heroImage" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required />
-          <button className="button primary" type="submit" disabled={uploadingHero}>{uploadingHero ? 'Uploading…' : 'Upload and publish hero photo'}</button>
-        </form>
-      </section>
     </>
   )
 }
