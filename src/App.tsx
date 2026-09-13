@@ -10,6 +10,7 @@ import { Home } from './pages/Home'
 import { LegalPage } from './pages/LegalPage'
 import { ServiceDetail } from './pages/ServiceDetail'
 import { Services } from './pages/Services'
+import { AdminAccount } from './pages/admin/AdminAccount'
 import { AdminBookings } from './pages/admin/AdminBookings'
 import { AdminCalendar } from './pages/admin/AdminCalendar'
 import { AdminClientRecord } from './pages/admin/AdminClientRecord'
@@ -22,6 +23,7 @@ import { AdminSettings } from './pages/admin/AdminSettings'
 const approvedAdminEmails = new Set([
   'haami@haktindustries.co.nz',
   'beetit.solutions@gmail.com',
+  'donna@dpplegalsolutions.co.nz',
 ])
 
 function ScrollToTop() {
@@ -105,6 +107,7 @@ function App() {
           <Route path="clients/:clientId" element={<AdminClientRecord />} />
           <Route path="help" element={<AdminHelp />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="account" element={<AdminAccount />} />
         </Route>
       </Routes>
     </BrowserRouter>
