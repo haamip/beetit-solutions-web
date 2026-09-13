@@ -61,9 +61,9 @@ export function Home() {
             <p className="hero-lead">{settings.heroLead}</p>
             <div className="button-row">
               <Link className="button primary" to="/book">
-                Book a consultation <ArrowRight size={18} />
+                {settings.heroPrimaryButton} <ArrowRight size={18} />
               </Link>
-              <Link className="button secondary" to="/services">View services</Link>
+              <Link className="button secondary" to="/services">{settings.heroSecondaryButton}</Link>
             </div>
           </div>
         </div>
@@ -72,12 +72,12 @@ export function Home() {
       <section className="section home-about">
         <div className="container split-section">
           <div>
-            <p className="eyebrow">About Donna</p>
-            <h2>Experience, clarity and a practical way forward.</h2>
+            <p className="eyebrow">{settings.aboutEyebrow}</p>
+            <h2>{settings.aboutTitle}</h2>
           </div>
           <div className="body-copy">
-            <p>Donna holds an LLB, LLM (Hons) and BA, with more than 20 years of experience across governance, policy, advocacy and advisory work.</p>
-            <p>Her approach is practical, respectful and culturally grounded, with a focus on helping people understand their options and move forward with confidence.</p>
+            <p>{settings.aboutBodyOne}</p>
+            <p>{settings.aboutBodyTwo}</p>
           </div>
         </div>
       </section>
@@ -86,10 +86,10 @@ export function Home() {
         <div className="container">
           <div className="section-heading services-showcase-heading">
             <div>
-              <p className="eyebrow">Services</p>
-              <h2>Support across a range of matters.</h2>
+              <p className="eyebrow">{settings.servicesEyebrow}</p>
+              <h2>{settings.servicesTitle}</h2>
             </div>
-            <Link className="text-link" to="/services">View all services <ArrowRight size={17} /></Link>
+            <Link className="text-link" to="/services">{settings.servicesLink} <ArrowRight size={17} /></Link>
           </div>
 
           <div className="service-grid service-grid-premium">
@@ -126,11 +126,11 @@ export function Home() {
       <section className="section cta-section home-cta">
         <div className="container cta-card">
           <div>
-            <p className="eyebrow">Ready to talk?</p>
-            <h2>Start with a consultation.</h2>
-            <p>Tell Donna what you need help with and choose a suitable consultation time.</p>
+            <p className="eyebrow">{settings.ctaEyebrow}</p>
+            <h2>{settings.ctaTitle}</h2>
+            <p>{settings.ctaBody}</p>
           </div>
-          <Link className="button primary" to="/book">Book now <ArrowRight size={18} /></Link>
+          <Link className="button primary" to="/book">{settings.ctaButton} <ArrowRight size={18} /></Link>
         </div>
       </section>
     </>
