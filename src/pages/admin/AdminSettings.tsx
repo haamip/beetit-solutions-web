@@ -1,7 +1,6 @@
 import { ImagePlus, RefreshCcw, Save } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
-import { siteConfig } from '../../config/site'
 import { defaultSiteSettings } from '../../lib/siteSettings'
 import { supabase } from '../../lib/supabase'
 import '../../site-editor-polish.css'
