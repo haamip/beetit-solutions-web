@@ -148,3 +148,161 @@
     width: 100%;
   }
 }
+
+
+/* Simple, one-section-at-a-time website editor. */
+.website-editor-grid {
+  grid-template-columns: minmax(0, 860px);
+  justify-content: start;
+}
+
+.editor-accordion {
+  padding: 0;
+  overflow: hidden;
+}
+
+.editor-accordion summary {
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 22px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.editor-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.editor-accordion summary::after {
+  content: "+";
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--olive-dark) 10%, white 90%);
+  color: var(--olive-dark);
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.editor-accordion[open] summary::after {
+  content: "−";
+}
+
+.editor-accordion[open] summary {
+  border-bottom: 1px solid rgba(67, 74, 56, .12);
+  background: color-mix(in srgb, var(--cream) 76%, white 24%);
+}
+
+.editor-accordion summary span {
+  display: grid;
+  gap: 4px;
+}
+
+.editor-accordion summary strong {
+  font-size: 1.08rem;
+}
+
+.editor-accordion summary small {
+  color: var(--muted);
+  font-size: .88rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.editor-accordion > p {
+  margin: 18px 22px 14px;
+}
+
+.editor-accordion > .settings-form,
+.editor-accordion > .colour-control-grid {
+  margin: 18px 22px 22px;
+}
+
+.website-editor-actions {
+  position: sticky;
+  bottom: 12px;
+  z-index: 5;
+  justify-content: flex-end;
+  padding: 14px;
+  border: 1px solid rgba(67, 74, 56, .16);
+  border-radius: 16px;
+  background: rgba(255, 253, 248, .96);
+  box-shadow: 0 14px 36px rgba(44, 48, 38, .12);
+  backdrop-filter: blur(10px);
+}
+
+.editor-save-status {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: .88rem;
+  font-weight: 750;
+}
+
+.editor-save-status.unsaved {
+  color: #805f1f;
+}
+
+.admin-view-public {
+  flex: 0 0 auto;
+}
+
+.account-panel {
+  max-width: 680px;
+}
+
+.account-panel .settings-form {
+  max-width: 560px;
+}
+
+.admin-view-site {
+  display: block;
+  margin: 12px 14px 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 10px;
+  color: inherit;
+  font-weight: 750;
+  text-align: center;
+}
+
+@media (max-width: 620px) {
+  .editor-accordion summary {
+    min-height: 76px;
+    padding: 17px 18px;
+  }
+
+  .editor-accordion summary small {
+    font-size: .82rem;
+  }
+
+  .editor-accordion > p {
+    margin-inline: 18px;
+  }
+
+  .editor-accordion > .settings-form,
+  .editor-accordion > .colour-control-grid {
+    margin: 16px 18px 20px;
+  }
+
+  .website-editor-actions {
+    bottom: 8px;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .editor-save-status {
+    margin-right: 0;
+    text-align: center;
+  }
+
+  .admin-view-public {
+    width: 100%;
+  }
+}
