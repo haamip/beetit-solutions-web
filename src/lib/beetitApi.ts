@@ -34,8 +34,9 @@ async function invokePublicPortal(body: Record<string, unknown>) {
 }
 
 export async function getAvailableSlots(date: string) {
-  const data = await invokePublicPortal({ action: 'availability', date })
-  return data.slots ?? []
+  const { data, error } = await supabase.rpc('get_available_slots', { p_date: date })
+  if (error) throw new Error('Availability could not be loaded')
+  return (data ?? []) as AvailableSlot[]
 }
 
 export async function submitBooking(payload: {
