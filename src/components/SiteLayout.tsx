@@ -20,9 +20,9 @@ export function SiteLayout() {
       <header className="site-header">
         <div className="container header-inner">
           <Link className="brand" to="/" onClick={() => setMenuOpen(false)}>
-            <span className="brand-mark">B</span>
+            <span className="brand-mark">D</span>
             <span>
-              <strong>Beet It Solutions</strong>
+              <strong>{siteConfig.brand}</strong>
               <small>Legal Advocacy & Advisory</small>
             </span>
           </Link>
@@ -71,7 +71,7 @@ export function SiteLayout() {
           </div>
         </div>
         <div className="container footer-bottom">
-          <span>© {new Date().getFullYear()} Beet It Solutions</span>
+          <span>© {new Date().getFullYear()} {siteConfig.brand}</span>
           <span>Website platform by HAKT Industries</span>
         </div>
       </footer>
