@@ -61,6 +61,33 @@
   line-height: 1.45;
 }
 
+/* Keep the photo picker compact and aligned with its publish action. */
+.hero-upload-panel {
+  display: grid;
+  gap: 20px;
+}
+
+.hero-upload-panel .dashboard-panel-heading {
+  margin-bottom: 0;
+}
+
+.hero-upload-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-upload-form input[type="file"] {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.hero-upload-form .button {
+  white-space: nowrap;
+}
+
 @media (max-width: 800px) {
   .settings-hero-preview-image {
     width: 66%;
@@ -104,5 +131,17 @@
     min-height: 430px;
     align-content: end;
     padding: 220px 24px 26px;
+  }
+
+  .hero-upload-panel {
+    gap: 16px;
+  }
+
+  .hero-upload-form {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-upload-form .button {
+    width: 100%;
   }
 }
