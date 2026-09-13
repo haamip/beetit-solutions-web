@@ -1,4 +1,4 @@
-import { ImagePlus, RefreshCcw, Save } from 'lucide-react'
+import { ImagePlus, RefreshCcw, Save, Settings } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import { defaultSiteSettings } from '../../lib/siteSettings'
