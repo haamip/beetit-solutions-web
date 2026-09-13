@@ -3,7 +3,7 @@ import { bookingServiceNames } from './services'
 export const siteConfig = {
   brand: 'DPP Legal Solutions',
   businessName: 'Donna Pokere Phillips Legal Advocacy & Advisory Services',
-  email: 'beetit.solutions@gmail.com',
+  email: 'donna@dpplegalsolutions.co.nz',
   phone: '027 602 5011',
   location: 'Tuakau, Waikato and South Auckland',
   bookingLength: '60 minutes',
