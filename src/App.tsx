@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { SiteLayout } from './components/SiteLayout'
 import { supabase } from './lib/supabase'
 import { Admin } from './pages/Admin'
@@ -23,6 +23,16 @@ const approvedAdminEmails = new Set([
   'haami@haktindustries.co.nz',
   'beetit.solutions@gmail.com',
 ])
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [pathname])
+
+  return null
+}
 
 function AdminAuthReturn() {
   useEffect(() => {
@@ -72,6 +82,7 @@ function AdminAuthReturn() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AdminAuthReturn />
       <Routes>
         <Route element={<SiteLayout />}>
