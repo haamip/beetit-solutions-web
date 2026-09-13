@@ -27,6 +27,19 @@ type SiteDraft = {
   publicEmail: string
   publicPhone: string
   publicLocation: string
+  heroPrimaryButton: string
+  heroSecondaryButton: string
+  aboutEyebrow: string
+  aboutTitle: string
+  aboutBodyOne: string
+  aboutBodyTwo: string
+  servicesEyebrow: string
+  servicesTitle: string
+  servicesLink: string
+  ctaEyebrow: string
+  ctaTitle: string
+  ctaBody: string
+  ctaButton: string
 }
 
 const defaultDraft: SiteDraft = {
@@ -44,6 +57,19 @@ const defaultDraft: SiteDraft = {
   publicEmail: defaultSiteSettings.publicEmail,
   publicPhone: defaultSiteSettings.publicPhone,
   publicLocation: defaultSiteSettings.publicLocation,
+  heroPrimaryButton: defaultSiteSettings.heroPrimaryButton,
+  heroSecondaryButton: defaultSiteSettings.heroSecondaryButton,
+  aboutEyebrow: defaultSiteSettings.aboutEyebrow,
+  aboutTitle: defaultSiteSettings.aboutTitle,
+  aboutBodyOne: defaultSiteSettings.aboutBodyOne,
+  aboutBodyTwo: defaultSiteSettings.aboutBodyTwo,
+  servicesEyebrow: defaultSiteSettings.servicesEyebrow,
+  servicesTitle: defaultSiteSettings.servicesTitle,
+  servicesLink: defaultSiteSettings.servicesLink,
+  ctaEyebrow: defaultSiteSettings.ctaEyebrow,
+  ctaTitle: defaultSiteSettings.ctaTitle,
+  ctaBody: defaultSiteSettings.ctaBody,
+  ctaButton: defaultSiteSettings.ctaButton,
 }
 
 export function AdminSettings() {
@@ -69,7 +95,7 @@ export function AdminSettings() {
         supabase.from('admin_users').select('id, email, full_name').eq('id', userId).maybeSingle(),
         supabase
           .from('site_settings')
-          .select('primary_color, background_color, accent_color, hero_image_path, hero_position, hero_overlay_strength, hero_image_scale, hero_height, hero_eyebrow, hero_title, hero_lead, public_email, public_phone, public_location')
+          .select('primary_color, background_color, accent_color, hero_image_path, hero_position, hero_overlay_strength, hero_image_scale, hero_height, hero_eyebrow, hero_title, hero_lead, public_email, public_phone, public_location, hero_primary_button, hero_secondary_button, about_eyebrow, about_title, about_body_one, about_body_two, services_eyebrow, services_title, services_link, cta_eyebrow, cta_title, cta_body, cta_button')
           .eq('id', 1)
           .maybeSingle(),
       ])
@@ -94,6 +120,19 @@ export function AdminSettings() {
           publicEmail: data.public_email || defaultDraft.publicEmail,
           publicPhone: data.public_phone || defaultDraft.publicPhone,
           publicLocation: data.public_location || defaultDraft.publicLocation,
+          heroPrimaryButton: data.hero_primary_button || defaultDraft.heroPrimaryButton,
+          heroSecondaryButton: data.hero_secondary_button || defaultDraft.heroSecondaryButton,
+          aboutEyebrow: data.about_eyebrow || defaultDraft.aboutEyebrow,
+          aboutTitle: data.about_title || defaultDraft.aboutTitle,
+          aboutBodyOne: data.about_body_one || defaultDraft.aboutBodyOne,
+          aboutBodyTwo: data.about_body_two || defaultDraft.aboutBodyTwo,
+          servicesEyebrow: data.services_eyebrow || defaultDraft.servicesEyebrow,
+          servicesTitle: data.services_title || defaultDraft.servicesTitle,
+          servicesLink: data.services_link || defaultDraft.servicesLink,
+          ctaEyebrow: data.cta_eyebrow || defaultDraft.ctaEyebrow,
+          ctaTitle: data.cta_title || defaultDraft.ctaTitle,
+          ctaBody: data.cta_body || defaultDraft.ctaBody,
+          ctaButton: data.cta_button || defaultDraft.ctaButton,
         })
       }
       setLoading(false)
@@ -152,6 +191,19 @@ export function AdminSettings() {
       publicEmail: String(data.get('publicEmail') ?? '').trim(),
       publicPhone: String(data.get('publicPhone') ?? '').trim(),
       publicLocation: String(data.get('publicLocation') ?? '').trim(),
+      heroPrimaryButton: String(data.get('heroPrimaryButton') ?? '').trim(),
+      heroSecondaryButton: String(data.get('heroSecondaryButton') ?? '').trim(),
+      aboutEyebrow: String(data.get('aboutEyebrow') ?? '').trim(),
+      aboutTitle: String(data.get('aboutTitle') ?? '').trim(),
+      aboutBodyOne: String(data.get('aboutBodyOne') ?? '').trim(),
+      aboutBodyTwo: String(data.get('aboutBodyTwo') ?? '').trim(),
+      servicesEyebrow: String(data.get('servicesEyebrow') ?? '').trim(),
+      servicesTitle: String(data.get('servicesTitle') ?? '').trim(),
+      servicesLink: String(data.get('servicesLink') ?? '').trim(),
+      ctaEyebrow: String(data.get('ctaEyebrow') ?? '').trim(),
+      ctaTitle: String(data.get('ctaTitle') ?? '').trim(),
+      ctaBody: String(data.get('ctaBody') ?? '').trim(),
+      ctaButton: String(data.get('ctaButton') ?? '').trim(),
     }
 
     setSaving(true)
@@ -173,6 +225,19 @@ export function AdminSettings() {
         public_email: next.publicEmail,
         public_phone: next.publicPhone,
         public_location: next.publicLocation,
+        hero_primary_button: next.heroPrimaryButton,
+        hero_secondary_button: next.heroSecondaryButton,
+        about_eyebrow: next.aboutEyebrow,
+        about_title: next.aboutTitle,
+        about_body_one: next.aboutBodyOne,
+        about_body_two: next.aboutBodyTwo,
+        services_eyebrow: next.servicesEyebrow,
+        services_title: next.servicesTitle,
+        services_link: next.servicesLink,
+        cta_eyebrow: next.ctaEyebrow,
+        cta_title: next.ctaTitle,
+        cta_body: next.ctaBody,
+        cta_button: next.ctaButton,
         updated_by: profile.id,
       })
       .eq('id', 1)
@@ -264,6 +329,19 @@ export function AdminSettings() {
         public_email: next.publicEmail,
         public_phone: next.publicPhone,
         public_location: next.publicLocation,
+        hero_primary_button: next.heroPrimaryButton,
+        hero_secondary_button: next.heroSecondaryButton,
+        about_eyebrow: next.aboutEyebrow,
+        about_title: next.aboutTitle,
+        about_body_one: next.aboutBodyOne,
+        about_body_two: next.aboutBodyTwo,
+        services_eyebrow: next.servicesEyebrow,
+        services_title: next.servicesTitle,
+        services_link: next.servicesLink,
+        cta_eyebrow: next.ctaEyebrow,
+        cta_title: next.ctaTitle,
+        cta_body: next.ctaBody,
+        cta_button: next.ctaButton,
         updated_by: profile.id,
       })
       .eq('id', 1)
@@ -378,6 +456,26 @@ export function AdminSettings() {
               <label>Small heading<input name="heroEyebrow" value={site.heroEyebrow} onChange={(event) => setSite((current) => ({ ...current, heroEyebrow: event.target.value }))} required /></label>
               <label>Main heading<textarea name="heroTitle" rows={2} value={site.heroTitle} onChange={(event) => setSite((current) => ({ ...current, heroTitle: event.target.value }))} required /></label>
               <label>Intro text<textarea name="heroLead" rows={3} value={site.heroLead} onChange={(event) => setSite((current) => ({ ...current, heroLead: event.target.value }))} required /></label>
+            </div>
+          </section>
+
+          <section className="website-editor-section website-copy-section">
+            <h3>Home page wording</h3>
+            <p>Edit the public wording while the layout and links stay protected.</p>
+            <div className="settings-form">
+              <label>Hero main button<input name="heroPrimaryButton" value={site.heroPrimaryButton} onChange={(event) => setSite((current) => ({ ...current, heroPrimaryButton: event.target.value }))} required /></label>
+              <label>Hero second button<input name="heroSecondaryButton" value={site.heroSecondaryButton} onChange={(event) => setSite((current) => ({ ...current, heroSecondaryButton: event.target.value }))} required /></label>
+              <label>About small heading<input name="aboutEyebrow" value={site.aboutEyebrow} onChange={(event) => setSite((current) => ({ ...current, aboutEyebrow: event.target.value }))} required /></label>
+              <label>About heading<textarea name="aboutTitle" rows={2} value={site.aboutTitle} onChange={(event) => setSite((current) => ({ ...current, aboutTitle: event.target.value }))} required /></label>
+              <label>About paragraph one<textarea name="aboutBodyOne" rows={4} value={site.aboutBodyOne} onChange={(event) => setSite((current) => ({ ...current, aboutBodyOne: event.target.value }))} required /></label>
+              <label>About paragraph two<textarea name="aboutBodyTwo" rows={4} value={site.aboutBodyTwo} onChange={(event) => setSite((current) => ({ ...current, aboutBodyTwo: event.target.value }))} required /></label>
+              <label>Services small heading<input name="servicesEyebrow" value={site.servicesEyebrow} onChange={(event) => setSite((current) => ({ ...current, servicesEyebrow: event.target.value }))} required /></label>
+              <label>Services heading<textarea name="servicesTitle" rows={2} value={site.servicesTitle} onChange={(event) => setSite((current) => ({ ...current, servicesTitle: event.target.value }))} required /></label>
+              <label>Services link label<input name="servicesLink" value={site.servicesLink} onChange={(event) => setSite((current) => ({ ...current, servicesLink: event.target.value }))} required /></label>
+              <label>Call to action small heading<input name="ctaEyebrow" value={site.ctaEyebrow} onChange={(event) => setSite((current) => ({ ...current, ctaEyebrow: event.target.value }))} required /></label>
+              <label>Call to action heading<textarea name="ctaTitle" rows={2} value={site.ctaTitle} onChange={(event) => setSite((current) => ({ ...current, ctaTitle: event.target.value }))} required /></label>
+              <label>Call to action text<textarea name="ctaBody" rows={3} value={site.ctaBody} onChange={(event) => setSite((current) => ({ ...current, ctaBody: event.target.value }))} required /></label>
+              <label>Call to action button<input name="ctaButton" value={site.ctaButton} onChange={(event) => setSite((current) => ({ ...current, ctaButton: event.target.value }))} required /></label>
             </div>
           </section>
 
