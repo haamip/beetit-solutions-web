@@ -31,7 +31,7 @@ export function ServiceDetail() {
 
   useSeo({
     title: service?.name ?? 'Service',
-    description: service?.summary ?? 'Beet It Solutions advocacy and advisory services.',
+    description: service?.summary ?? 'DPP Legal Solutions advocacy and advisory services.',
     path: `/services/${slug}`,
     noIndex: !service,
   })
