@@ -72,7 +72,7 @@ export function SiteLayout() {
         </div>
         <div className="container footer-bottom">
           <span>© {new Date().getFullYear()} {siteConfig.brand}</span>
-          <span>Website platform by HAKT Industries</span>
+          <span>Website platform by <a href="https://haktindustries.co.nz" target="_blank" rel="noreferrer">HAKT Industries</a></span>
         </div>
       </footer>
     </div>
