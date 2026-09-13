@@ -87,8 +87,8 @@ Deno.serve(async (req: Request) => {
       return json({ error: message }, 409);
     }
 
-    const from = Deno.env.get("BEETIT_EMAIL_FROM") || "Beet It Solutions <beetit@haktindustries.co.nz>";
-    const donnaEmail = Deno.env.get("BEETIT_EMAIL_REPLY_TO") || "beetit.solutions@gmail.com";
+    const from = Deno.env.get("BEETIT_EMAIL_FROM") || "DPP Legal Solutions <beetit@haktindustries.co.nz>";
+    const donnaEmail = Deno.env.get("BEETIT_EMAIL_REPLY_TO") || "donna@dpplegalsolutions.co.nz";
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     let emailSent = true;
     let title = "Booking updated";
@@ -100,24 +100,24 @@ Deno.serve(async (req: Request) => {
       body = `${updated.full_name}'s booking was confirmed for ${nzDateTime(updated.start_at)}.`;
       emailSent = await sendEmail(resendApiKey, {
         from, to: [updated.email], reply_to: donnaEmail,
-        subject: "Your consultation is confirmed – Beet It Solutions",
-        html: `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>Booking confirmed</h2><p>Kia ora ${firstName},</p><p>Your consultation with Beet It Solutions is confirmed.</p><p><strong>${escapeHtml(updated.service)}</strong><br>${escapeHtml(nzDateTime(updated.start_at))}<br>${escapeHtml(updated.consultation_type)}</p><p>Ngā mihi,<br>Beet It Solutions</p></body></html>`,
+        subject: "Your consultation is confirmed – DPP Legal Solutions",
+        html: `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>Booking confirmed</h2><p>Kia ora ${firstName},</p><p>Your consultation with DPP Legal Solutions is confirmed.</p><p><strong>${escapeHtml(updated.service)}</strong><br>${escapeHtml(nzDateTime(updated.start_at))}<br>${escapeHtml(updated.consultation_type)}</p><p>Ngā mihi,<br>DPP Legal Solutions</p></body></html>`,
       });
     } else if (action === "reschedule") {
       title = "Booking rescheduled";
       body = `${updated.full_name}'s booking was moved from ${nzDateTime(booking.start_at)} to ${nzDateTime(updated.start_at)}.`;
       emailSent = await sendEmail(resendApiKey, {
         from, to: [updated.email], reply_to: donnaEmail,
-        subject: "Your consultation time has changed – Beet It Solutions",
-        html: `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>Consultation rescheduled</h2><p>Kia ora ${firstName},</p><p>Your consultation time has been changed.</p><p><strong>New time:</strong> ${escapeHtml(nzDateTime(updated.start_at))}<br><strong>Service:</strong> ${escapeHtml(updated.service)}<br><strong>Type:</strong> ${escapeHtml(updated.consultation_type)}</p><p>If this time does not work, reply to this email and Donna can help.</p><p>Ngā mihi,<br>Beet It Solutions</p></body></html>`,
+        subject: "Your consultation time has changed – DPP Legal Solutions",
+        html: `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>Consultation rescheduled</h2><p>Kia ora ${firstName},</p><p>Your consultation time has been changed.</p><p><strong>New time:</strong> ${escapeHtml(nzDateTime(updated.start_at))}<br><strong>Service:</strong> ${escapeHtml(updated.service)}<br><strong>Type:</strong> ${escapeHtml(updated.consultation_type)}</p><p>If this time does not work, reply to this email and Donna can help.</p><p>Ngā mihi,<br>DPP Legal Solutions</p></body></html>`,
       });
     } else if (action === "cancel") {
       title = "Booking cancelled";
       body = `${updated.full_name}'s booking for ${nzDateTime(booking.start_at)} was cancelled.`;
       emailSent = await sendEmail(resendApiKey, {
         from, to: [updated.email], reply_to: donnaEmail,
-        subject: "Your consultation has been cancelled – Beet It Solutions",
-        html: `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>Consultation cancelled</h2><p>Kia ora ${firstName},</p><p>Your consultation scheduled for ${escapeHtml(nzDateTime(booking.start_at))} has been cancelled.</p><p>If you need another time, reply to this email or make a new booking through the website.</p><p>Ngā mihi,<br>Beet It Solutions</p></body></html>`,
+        subject: "Your consultation has been cancelled – DPP Legal Solutions",
+        html: `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>Consultation cancelled</h2><p>Kia ora ${firstName},</p><p>Your consultation scheduled for ${escapeHtml(nzDateTime(booking.start_at))} has been cancelled.</p><p>If you need another time, reply to this email or make a new booking through the website.</p><p>Ngā mihi,<br>DPP Legal Solutions</p></body></html>`,
       });
     } else {
       title = "Booking completed";
