@@ -1,7 +1,7 @@
 import { bookingServiceNames } from './services'
 
 export const siteConfig = {
-  brand: 'Beet It Solutions',
+  brand: 'DPP Legal Solutions',
   businessName: 'Donna Pokere Phillips Legal Advocacy & Advisory Services',
   email: 'beetit.solutions@gmail.com',
   phone: '027 602 5011',
