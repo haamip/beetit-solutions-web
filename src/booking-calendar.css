@@ -203,6 +203,7 @@
 .availability-status {
   width: 100%;
   max-width: 72px;
+  min-width: 0;
   height: 30px;
   box-sizing: border-box;
   display: inline-flex;
@@ -221,6 +222,8 @@
   text-align: center;
   text-transform: uppercase;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .availability-status.free {
@@ -298,6 +301,9 @@
   .availability-status {
     max-width: 82px;
     height: 32px;
-    font-size: 0.66rem;
+    gap: 2px;
+    padding-inline: 3px;
+    font-size: 0.6rem;
+    letter-spacing: 0;
   }
 }
