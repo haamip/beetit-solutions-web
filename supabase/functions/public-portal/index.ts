@@ -55,8 +55,8 @@ Deno.serve(async (req: Request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  const from = Deno.env.get("BEETIT_EMAIL_FROM") || "Beet It Solutions <beetit@haktindustries.co.nz>";
-  const donnaEmail = Deno.env.get("BEETIT_EMAIL_REPLY_TO") || "beetit.solutions@gmail.com";
+  const from = Deno.env.get("BEETIT_EMAIL_FROM") || "DPP Legal Solutions <beetit@haktindustries.co.nz>";
+  const donnaEmail = Deno.env.get("BEETIT_EMAIL_REPLY_TO") || "donna@dpplegalsolutions.co.nz";
 
   try {
     const payload = await req.json();
@@ -92,11 +92,11 @@ Deno.serve(async (req: Request) => {
 
       const when = formatNzDateTime(row.start_at);
       const firstName = escapeHtml(String(row.full_name).trim().split(/\s+/)[0] || "there");
-      const clientHtml = `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>Beet It Solutions</h2><p>Kia ora ${firstName},</p><p>We have received your consultation request and your selected time is being held while Donna reviews it.</p><p><strong>${escapeHtml(row.service)}</strong><br>${escapeHtml(when)}<br>${escapeHtml(row.consultation_type)}</p><p>Donna will contact you if anything else is needed.</p><p>Ngā mihi,<br>Beet It Solutions</p></body></html>`;
+      const clientHtml = `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>DPP Legal Solutions</h2><p>Kia ora ${firstName},</p><p>We have received your consultation request and your selected time is being held while Donna reviews it.</p><p><strong>${escapeHtml(row.service)}</strong><br>${escapeHtml(when)}<br>${escapeHtml(row.consultation_type)}</p><p>Donna will contact you if anything else is needed.</p><p>Ngā mihi,<br>DPP Legal Solutions</p></body></html>`;
       const donnaHtml = `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>New booking request</h2><p><strong>${escapeHtml(row.full_name)}</strong> has requested a consultation.</p><p><strong>Service:</strong> ${escapeHtml(row.service)}<br><strong>When:</strong> ${escapeHtml(when)}<br><strong>Type:</strong> ${escapeHtml(row.consultation_type)}<br><strong>Email:</strong> ${escapeHtml(row.email)}<br><strong>Phone:</strong> ${escapeHtml(row.phone)}</p>${row.important_date ? `<p><strong>Important date:</strong> ${escapeHtml(row.important_date)}</p>` : ""}${row.message ? `<p><strong>Message:</strong><br>${escapeHtml(row.message)}</p>` : ""}</body></html>`;
 
       const [clientSend, donnaSend] = await Promise.all([
-        sendEmail(resendApiKey, { from, to: [row.email], reply_to: donnaEmail, subject: "We received your consultation request – Beet It Solutions", html: clientHtml }),
+        sendEmail(resendApiKey, { from, to: [row.email], reply_to: donnaEmail, subject: "We received your consultation request – DPP Legal Solutions", html: clientHtml }),
         sendEmail(resendApiKey, { from, to: [donnaEmail], reply_to: row.email, subject: `New booking request – ${row.full_name}`, html: donnaHtml }),
       ]);
       return json({ id: bookingId, emailSent: clientSend.ok && donnaSend.ok });
@@ -117,10 +117,10 @@ Deno.serve(async (req: Request) => {
       if (!row) return json({ id: inquiryId, emailSent: false });
 
       const firstName = escapeHtml(String(row.name).trim().split(/\s+/)[0] || "there");
-      const clientHtml = `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>Beet It Solutions</h2><p>Kia ora ${firstName},</p><p>Thanks for getting in touch. Your enquiry has been received and Donna has been notified.</p><p>She will come back to you about the best next step.</p><p>Ngā mihi,<br>Beet It Solutions</p></body></html>`;
+      const clientHtml = `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>DPP Legal Solutions</h2><p>Kia ora ${firstName},</p><p>Thanks for getting in touch. Your enquiry has been received and Donna has been notified.</p><p>She will come back to you about the best next step.</p><p>Ngā mihi,<br>DPP Legal Solutions</p></body></html>`;
       const donnaHtml = `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#252b24"><h2>New website enquiry</h2><p><strong>${escapeHtml(row.name)}</strong> has sent a message.</p><p><strong>Email:</strong> ${escapeHtml(row.email)}${row.phone ? `<br><strong>Phone:</strong> ${escapeHtml(row.phone)}` : ""}</p><p><strong>Message:</strong><br>${escapeHtml(row.message)}</p></body></html>`;
       const [clientSend, donnaSend] = await Promise.all([
-        sendEmail(resendApiKey, { from, to: [row.email], reply_to: donnaEmail, subject: "We received your enquiry – Beet It Solutions", html: clientHtml }),
+        sendEmail(resendApiKey, { from, to: [row.email], reply_to: donnaEmail, subject: "We received your enquiry – DPP Legal Solutions", html: clientHtml }),
         sendEmail(resendApiKey, { from, to: [donnaEmail], reply_to: row.email, subject: `New website enquiry – ${row.name}`, html: donnaHtml }),
       ]);
       return json({ id: inquiryId, emailSent: clientSend.ok && donnaSend.ok });
