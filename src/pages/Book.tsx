@@ -383,7 +383,7 @@ export function Book() {
 
           <label className="checkbox-field">
             <input name="privacyConsent" type="checkbox" required />
-            <span>I consent to Beet It Solutions using this information to respond to my booking request.</span>
+            <span>I consent to DPP Legal Solutions using this information to respond to my booking request.</span>
           </label>
 
           <button className="button primary full-width" type="submit" disabled={submitting || !selectedStartAt}>
