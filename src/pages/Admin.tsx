@@ -7,7 +7,6 @@ import {
   LogOut,
   Menu,
   Globe2,
-  Settings,
   UserRound,
   Users,
   X,
