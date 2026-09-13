@@ -86,27 +86,27 @@ Deno.serve(async (req: Request) => {
     if (linkError || !link) return json({ error: "Secure upload link could not be created" }, 500);
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const from = Deno.env.get("BEETIT_EMAIL_FROM") || "Beet It Solutions <beetit@haktindustries.co.nz>";
-    const replyTo = Deno.env.get("BEETIT_EMAIL_REPLY_TO") || "beetit.solutions@gmail.com";
+    const from = Deno.env.get("BEETIT_EMAIL_FROM") || "DPP Legal Solutions <beetit@haktindustries.co.nz>";
+    const replyTo = Deno.env.get("BEETIT_EMAIL_REPLY_TO") || "donna@dpplegalsolutions.co.nz";
 
     if (!resendApiKey) return json({ sent: false, reason: "email_not_configured", uploadUrl, email: client.email, expiresAt });
 
     const firstName = String(client.full_name || "there").trim().split(/\s+/)[0] || "there";
     const html = `
       <div style="font-family:Arial,sans-serif;line-height:1.6;color:#252b24;max-width:620px;margin:auto">
-        <h2>Beet It Solutions</h2>
+        <h2>DPP Legal Solutions</h2>
         <p>Kia ora ${firstName},</p>
         <p>We need a copy of your ID to confirm your details. Please use the secure button below to upload a clear photo or PDF of your identity document.</p>
         <p style="margin:28px 0"><a href="${uploadUrl}" style="display:inline-block;background:#3f4938;color:white;text-decoration:none;padding:14px 22px;border-radius:999px;font-weight:700">Upload ID securely</a></p>
         <p>This private link can only be used once and expires in 7 days.</p>
-        <p>If you were not expecting this request, please contact Beet It Solutions before uploading anything.</p>
-        <p>Ngā mihi,<br>Beet It Solutions</p>
+        <p>If you were not expecting this request, please contact DPP Legal Solutions before uploading anything.</p>
+        <p>Ngā mihi,<br>DPP Legal Solutions</p>
       </div>`;
 
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [client.email], reply_to: replyTo, subject: "Secure ID upload – Beet It Solutions", html }),
+      body: JSON.stringify({ from, to: [client.email], reply_to: replyTo, subject: "Secure ID upload – DPP Legal Solutions", html }),
     });
 
     if (!emailResponse.ok) return json({ sent: false, reason: "email_failed", uploadUrl, email: client.email, expiresAt });
