@@ -6,7 +6,9 @@ import {
   LockKeyhole,
   LogOut,
   Menu,
+  Globe2,
   Settings,
+  UserRound,
   Users,
   X,
 } from 'lucide-react'
@@ -25,6 +27,7 @@ type AdminProfile = {
 const authorisedAdmins = {
   'haami@haktindustries.co.nz': 'Haami Phillips',
   'beetit.solutions@gmail.com': 'Donna Pokere Phillips',
+  'donna@dpplegalsolutions.co.nz': 'Donna Pokere Phillips',
 } as const
 
 const adminNav = [
@@ -33,8 +36,9 @@ const adminNav = [
   { to: '/admin/calendar', label: 'Calendar', icon: CalendarDays },
   { to: '/admin/enquiries', label: 'Enquiries', icon: Inbox },
   { to: '/admin/clients', label: 'Clients', icon: Users },
+  { to: '/admin/settings', label: 'Website', icon: Globe2 },
+  { to: '/admin/account', label: 'Account', icon: UserRound },
   { to: '/admin/help', label: 'Help', icon: CircleHelp },
-  { to: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 const LOGIN_COOLDOWN_SECONDS = 60
@@ -50,7 +54,7 @@ function getInitialLoginCooldown() {
 export function Admin() {
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [profile, setProfile] = useState<AdminProfile | null>(null)
-  const [loginEmail, setLoginEmail] = useState('haami@haktindustries.co.nz')
+  const [loginEmail, setLoginEmail] = useState('donna@dpplegalsolutions.co.nz')
   const [loginSent, setLoginSent] = useState(false)
   const [loginError, setLoginError] = useState('')
   const [loginSending, setLoginSending] = useState(false)
@@ -59,7 +63,7 @@ export function Admin() {
 
   useSeo({
     title: 'Admin',
-    description: 'Secure Beet It Solutions administration area.',
+    description: 'Secure DPP Legal Solutions administration area.',
     path: '/admin',
     noIndex: true,
   })
@@ -89,7 +93,7 @@ export function Admin() {
     if (error || !adminProfile) {
       await supabase.auth.signOut()
       setProfile(null)
-      setLoginError('This account is not authorised for the Beet It Solutions admin area.')
+      setLoginError('This account is not authorised for the DPP Legal Solutions admin area.')
       setCheckingAuth(false)
       return
     }
@@ -209,7 +213,7 @@ export function Admin() {
           <LockKeyhole size={30} />
           <p className="eyebrow">Secure admin</p>
           <h1>Admin dashboard</h1>
-          <p>Sign in with an approved Beet It Solutions or HAKT Industries admin email address.</p>
+          <p>Enter your approved admin email and we’ll send you a secure sign in link.</p>
 
           <label className="admin-email-label">
             Admin email
@@ -249,9 +253,9 @@ export function Admin() {
     <div className="admin-shell">
       <aside className={navOpen ? 'admin-sidebar open' : 'admin-sidebar'}>
         <div className="admin-brand">
-          <div className="brand-mark">B</div>
+          <div className="brand-mark">D</div>
           <div>
-            <strong>Beet It Solutions</strong>
+            <strong>DPP Legal Solutions</strong>
             <span>Secure Administration</span>
           </div>
           <button className="admin-nav-close" type="button" aria-label="Close admin navigation" onClick={() => setNavOpen(false)}>
@@ -274,6 +278,9 @@ export function Admin() {
               </NavLink>
             )
           })}
+                  <a className="admin-view-site" href="/" target="_blank" rel="noreferrer">
+            View website
+          </a>
         </nav>
 
         <div className="admin-sidebar-footer">
@@ -292,7 +299,7 @@ export function Admin() {
           <button type="button" aria-label="Open admin navigation" onClick={() => setNavOpen(true)}>
             <Menu size={22} />
           </button>
-          <strong>Beet It Admin</strong>
+          <strong>DPP Admin</strong>
         </header>
         <main className="admin-content">
           <Outlet context={{ profile }} />
