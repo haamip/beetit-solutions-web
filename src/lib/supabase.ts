@@ -1,13 +1,19 @@
 import { createClient } from '@supabase/supabase-js'
 
-const fallbackSupabaseUrl = 'https://ikfxzhughwiqttujrxba.supabase.co'
+const projectRef = 'ikfxzhughwiqttujrxba'
+const fallbackSupabaseUrl = `https://${projectRef}.supabase.co`
 const fallbackPublishableKey = 'sb_publishable_8nsFX0N16d7Ar16HpbYfGg_d6axDde-'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || fallbackSupabaseUrl
-const supabaseKey =
+const configuredUrl = import.meta.env.VITE_SUPABASE_URL
+const configuredKey =
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  fallbackPublishableKey
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+
+// Prevent a stale or incorrectly linked Vercel integration from sending this
+// production site to another Supabase project.
+const isExpectedProject = configuredUrl?.includes(`https://${projectRef}.supabase.co`) === true
+const supabaseUrl = isExpectedProject ? configuredUrl : fallbackSupabaseUrl
+const supabaseKey = isExpectedProject && configuredKey ? configuredKey : fallbackPublishableKey
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
