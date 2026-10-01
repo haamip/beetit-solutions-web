@@ -15,7 +15,7 @@ type SupportRequest = {
   created_at: string
 }
 
-const VISUAL_ADMIN_GUIDE_URL = 'https://drive.google.com/file/d/1J8TITP9u236_B9AqEHcsjxrdE1EkGAm3/view?usp=drivesdk'
+const VISUAL_ADMIN_GUIDE_URL = 'https://drive.google.com/file/d/1P8h8UikNCYoyO7eSbEfcszqEKJsvRdZZ/view?usp=drivesdk'
 
 const helpArticles = [
   {
