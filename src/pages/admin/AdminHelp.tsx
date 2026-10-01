@@ -15,7 +15,7 @@ type SupportRequest = {
   created_at: string
 }
 
-const VISUAL_ADMIN_GUIDE_URL = 'https://drive.google.com/file/d/1P8h8UikNCYoyO7eSbEfcszqEKJsvRdZZ/view?usp=drivesdk'
+const VISUAL_ADMIN_GUIDE_URL = '/help/admin-guide.html'
 
 const helpArticles = [
   {
@@ -181,7 +181,7 @@ export function AdminHelp() {
           <p>Open the illustrated PDF for a quick map of Dashboard, Bookings, Calendar, Enquiries, Clients, Website, Account and Help - including what to be careful with around client records and ID.</p>
         </div>
         <a className="button primary" href={VISUAL_ADMIN_GUIDE_URL} target="_blank" rel="noreferrer">
-          <BookOpenCheck size={18} /> Open visual PDF guide
+          <BookOpenCheck size={18} /> Open visual guide
         </a>
       </section>
 
