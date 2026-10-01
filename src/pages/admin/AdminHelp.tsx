@@ -15,6 +15,8 @@ type SupportRequest = {
   created_at: string
 }
 
+const VISUAL_ADMIN_GUIDE_URL = 'https://drive.google.com/file/d/1J8TITP9u236_B9AqEHcsjxrdE1EkGAm3/view?usp=drivesdk'
+
 const helpArticles = [
   {
     title: 'Create a client without making duplicates',
@@ -171,6 +173,17 @@ export function AdminHelp() {
 
       {error && <div className="form-status error">{error}</div>}
       {notice && <div className="form-status success">{notice}</div>}
+
+      <section className="dashboard-panel visual-admin-guide-panel">
+        <div className="visual-admin-guide-copy">
+          <p className="eyebrow">Visual admin guide</p>
+          <h2>Screen-by-screen help</h2>
+          <p>Open the illustrated PDF for a quick map of Dashboard, Bookings, Calendar, Enquiries, Clients, Website, Account and Help - including what to be careful with around client records and ID.</p>
+        </div>
+        <a className="button primary" href={VISUAL_ADMIN_GUIDE_URL} target="_blank" rel="noreferrer">
+          <BookOpenCheck size={18} /> Open visual PDF guide
+        </a>
+      </section>
 
       <div className="help-grid">
         <section className="dashboard-panel help-articles-panel">

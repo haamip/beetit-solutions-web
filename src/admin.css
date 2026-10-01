@@ -845,3 +845,7 @@
     align-items: flex-start;
   }
 }
+
+.visual-admin-guide-panel{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:20px;background:linear-gradient(135deg,rgba(255,253,248,.96),rgba(235,231,220,.92))}
+.visual-admin-guide-copy{max-width:760px}.visual-admin-guide-copy h2{margin-bottom:8px}.visual-admin-guide-copy p:last-child{margin-bottom:0}
+@media(max-width:760px){.visual-admin-guide-panel{align-items:flex-start;flex-direction:column}.visual-admin-guide-panel .button{width:100%}}
