@@ -106,27 +106,18 @@ export function Book() {
     queueMicrotask(() => {
       const openDates = calendarDates.filter(isOnlineBookingDay)
 
-      Promise.all(
-        openDates.map(async (calendarDate) => {
-          try {
-            return { calendarDate, slots: await getAvailableSlots(calendarDate), failed: false }
-          } catch {
-            return { calendarDate, slots: undefined, failed: true }
-          }
-        }),
-      ).then((entries) => {
-        if (cancelled) return
-
-        const nextAvailability: Record<string, AvailableSlot[]> = {}
-        const nextErrors: Record<string, boolean> = {}
-
-        entries.forEach((entry) => {
-          nextErrors[entry.calendarDate] = entry.failed
-          if (entry.slots !== undefined) nextAvailability[entry.calendarDate] = entry.slots
-        })
-
-        setAvailability((current) => ({ ...current, ...nextAvailability }))
-        setAvailabilityErrors((current) => ({ ...current, ...nextErrors }))
+      // Settle dates independently: a slow request must not hold the whole calendar in "Checking".
+      openDates.forEach((calendarDate) => {
+        void getAvailableSlots(calendarDate)
+          .then((daySlots) => {
+            if (cancelled) return
+            setAvailability((current) => ({ ...current, [calendarDate]: daySlots }))
+            setAvailabilityErrors((current) => ({ ...current, [calendarDate]: false }))
+          })
+          .catch(() => {
+            if (cancelled) return
+            setAvailabilityErrors((current) => ({ ...current, [calendarDate]: true }))
+          })
       })
     })
 
@@ -207,16 +198,22 @@ export function Book() {
       setDate('')
       setSlots([])
       setSelectedStartAt('')
-      setAvailability((current) => {
-        const copy = { ...current }
-        delete copy[date]
-        return copy
-      })
-      setAvailabilityErrors((current) => {
-        const copy = { ...current }
-        delete copy[date]
-        return copy
-      })
+      // A completed booking removes only that slot, not the rest of the day.
+      // Refresh availability instead of deleting the cached date and leaving it stuck on "Checking".
+      if (date) {
+        try {
+          const refreshedSlots = await getAvailableSlots(date)
+          setAvailability((current) => ({ ...current, [date]: refreshedSlots }))
+          setAvailabilityErrors((current) => ({ ...current, [date]: false }))
+        } catch {
+          setAvailability((current) => {
+            const copy = { ...current }
+            delete copy[date]
+            return copy
+          })
+          setAvailabilityErrors((current) => ({ ...current, [date]: true }))
+        }
+      }
     } catch (bookingError) {
       const message = bookingError instanceof Error ? bookingError.message : 'We could not submit your booking.'
       setError(message.includes('taken') || message.includes('available') ? message : 'We could not submit your booking. Please check the details and try again.')
@@ -334,8 +331,8 @@ export function Book() {
                 const display = formatCalendarDay(calendarDate)
                 const daySlots = availability[calendarDate]
                 const status = getDayStatus(calendarDate, daySlots, availabilityErrors[calendarDate] === true)
-                const disabled = status === 'closed' || status === 'full' || status === 'loading'
                 const selected = date === calendarDate
+                const disabled = status === 'closed' || status === 'full' || (status === 'loading' && !selected)
 
                 return (
                   <button key={calendarDate} className={`availability-day ${status}${selected ? ' selected' : ''}`} type="button" disabled={disabled} onClick={() => void handleDateChange(calendarDate)}>
